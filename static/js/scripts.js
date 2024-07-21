@@ -1,114 +1,108 @@
 // Gameboard module
 const gameBoard = (() => {
-    let board = ["", "", "", "", "", "", "", "", ""];
-    const getBoard = () => board;
-    const setBoard = (index, value) => board[index] = value;
-    const resetBoard = () => board = ["", "", "", "", "", "", "", "", ""];
-    return { getBoard, setBoard, resetBoard };
-})
+    let gameBoard = ["", "", "", "", "", "", "", "", ""];
+    const getGameBoard = () => gameBoard;
+    const setGameBoard = (index, value) => {
+        gameBoard[index] = value;
+    };
+    const resetGameBoard = () => {
+        gameBoard = ["", "", "", "", "", "", "", "", ""];
+    };
+    return { getGameBoard, setGameBoard, resetGameBoard };
+})();
 
+// Display controller module
+const displayController = (() => {
+    const cells = document.querySelectorAll(".cell");
+    const status = document.querySelector(".status");
+    const restartButton = document.querySelector(".restart-button");
+    const render = () => {
+        gameBoard.getGameBoard().forEach((value, index) => {
+            cells[index].innerHTML = value;
+        });
+    };
+    const setStatus = (message) => {
+        status.textContent = message;
+    };
+    const setRestartButton = (message) => {
+        restartButton.textContent = message;
+    };
+    return { render, setStatus, setRestartButton };
+})();
 
-// Player factory function
-const Player = (name, marker) => {
-    return { name, marker };
-}
-
-// Game module
-const game = (() => {
-    let player1 = Player("Player 1", "X");
-    let player2 = Player("Player 2", "O");
-    let currentPlayer = player1;
-    let winner = null;
-    let gameOver = false;
-    let moves = 0;
-
+// Game controller module
+const gameController = (() => {
+    let currentPlayer = "X";
+    let gameActive = true;
+    const winningConditions = [
+        [0, 1, 2],
+        [3, 4, 5],
+        [6, 7, 8],
+        [0, 3, 6],
+        [1, 4, 7],
+        [2, 5, 8],
+        [0, 4, 8],
+        [2, 4, 6],
+    ];
     const checkWinner = () => {
-        const board = gameBoard().getBoard();
-        const winningCombos = [
-            [0, 1, 2], [3, 4, 5], [6, 7, 8], // Rows
-            [0, 3, 6], [1, 4, 7], [2, 5, 8], // Columns
-            [0, 4, 8], [2, 4, 6] // Diagonals
-        ];
-        winningCombos.forEach(combo => {
-            if (board[combo[0]] == currentPlayer.marker && board[combo[1]] == currentPlayer.marker && board[combo[2]] == currentPlayer.marker) {
-                winner = currentPlayer;
-                gameOver = true;
+        let winner = null;
+        winningConditions.forEach((condition) => {
+            const [a, b, c] = condition;
+            if (
+                gameBoard.getGameBoard()[a] &&
+                gameBoard.getGameBoard()[a] === gameBoard.getGameBoard()[b] &&
+                gameBoard.getGameBoard()[a] === gameBoard.getGameBoard()[c]
+            ) {
+                winner = gameBoard.getGameBoard()[a];
             }
         });
-        if (moves === 9 && !winner) {
-            gameOver = true;
+        return winner;
+    };
+    const checkTie = () => {
+        return gameBoard.getGameBoard().every((cell) => cell !== "");
+    };
+    const handleCellClick = (e) => {
+        const cell = e.target;
+        const index = parseInt(cell.getAttribute("data-cell"));
+        if (gameBoard.getGameBoard()[index] !== "" || !gameActive) {
+            return;
         }
-    }
-
-    const switchPlayer = () => {
-        currentPlayer = currentPlayer === player1 ? player2 : player1;
-    }
-
-    const playMove = (index) => { 
-        if (gameBoard().getBoard()[index] === "" && ! gameOver) {
-            gameBoard().setBoard(index, currentPlayer.marker);
-            moves++;
-            checkWinner();
-            switchPlayer();
+        gameBoard.setGameBoard(index, currentPlayer);
+        displayController.render();
+        const winner = checkWinner();
+        if (winner) {
+            gameActive = false;
+            displayController.setStatus(`${winner} wins!`);
+            displayController.setRestartButton("Restart");
+            return;
         }
-    }
-
-    const resetGame = () => {
-        gameBoard().resetBoard();
-        currentPlayer = player1;
-        winner = null;
-        gameOver = false;
-        moves = 0;
-    }
-
-    return { playMove, resetGame, winner, gameOver, currentPlayer };
-
-})
-
-
-// Display module (CLI)
-const displayControllerCLI = (() => {
-    const displayBoard = () => {
-        const board = gameBoard().getBoard();
-        console.log(` ${board[0]} | ${board[1]} | ${board[2]} `);
-        console.log(`---|---|---`);
-        console.log(` ${board[3]} | ${board[4]} | ${board[5]} `);
-        console.log(`---|---|---`);
-        console.log(` ${board[6]} | ${board[7]} | ${board[8]} `);
-    }
-
-    const displayWinner = () => {
-        if (game().winner) {
-            console.log(`${game().winner.name} wins!`);
+        if (checkTie()) {
+            gameActive = false;
+            displayController.setStatus("It's a tie!");
+            displayController.setRestartButton("Restart");
+            return;
         }
-    }
-    
-    const displayCurrentPlayer = () => {
-        console.log(`${game().currentPlayer.name}'s turn`);
-    }
+        currentPlayer = currentPlayer === "X" ? "O" : "X";
+        displayController.setStatus(
+            currentPlayer === "X" ? "Player 1's Turn" : "Player 2's Turn"
+        );
+    };
+    const handleRestart = () => {
+        gameBoard.resetGameBoard();
+        gameActive = true;
+        currentPlayer = "X";
+        displayController.render();
+        displayController.setStatus("Player 1's Turn");
+        displayController.setRestartButton("Restart");
+    };
+    return { handleCellClick, handleRestart };
+})();
 
-    const displayGameOver = () => {
-        if (game().gameOver) {
-            console.log("Game over!");
-        }
-    }
+// Event listeners
+document.querySelectorAll(".cell").forEach((cell) => {
+    cell.addEventListener("click", gameController.handleCellClick);
+});
+document.querySelector(".restart-button").addEventListener("click", gameController.handleRestart);
 
-    return { displayBoard, displayWinner, displayCurrentPlayer, displayGameOver };
-})
-
-// Display module (DOM)
-// TODO: Implement displayControllerDOM
-
-
-
-function playGameCLI () {
-    displayControllerCLI().displayBoard();
-    while (!game().gameOver) {
-        displayControllerCLI().displayCurrentPlayer();
-        let move = prompt("Enter a number between 0 and 8: ");
-        game().playMove(move);
-        displayControllerCLI().displayBoard();
-    }
-    displayControllerCLI().displayWinner();
-    displayControllerCLI().displayGameOver();
-}
+// Initial render
+displayController.render();

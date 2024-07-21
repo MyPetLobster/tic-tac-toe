@@ -47,8 +47,6 @@ a {
 }
 
 
-
-
 /* GENERAL/TOP LEVEL */
 body {
     height: 100vh;
@@ -79,9 +77,6 @@ button {
     width: 100%;
     background-color: var(--bg-grey);
 }
-
-
-
 h1 {
     font-family: '3Dumb', sans-serif;
     font-size: 3em;
@@ -89,10 +84,6 @@ h1 {
 h2 {
     font-family: '2Dumb', sans-serif;
 }
-
-
-
-
 
 
 /* ---- BUTTONS ---- */
@@ -119,7 +110,6 @@ button:active {
 }
 
 
-
 /* GAME BOARD */
 .game-board {
     display: grid;
@@ -140,15 +130,15 @@ button:active {
     height: 100%;
     object-fit: cover;
 }
-.cell[data-cell="2"],
-.cell[data-cell="5"],
-.cell[data-cell="8"] {
+.cell[data-cell="1"],
+.cell[data-cell="4"],
+.cell[data-cell="7"] {
     border-left: 2px solid black;
     border-right: 2px solid black;
 } 
+.cell[data-cell="3"],
 .cell[data-cell="4"],
-.cell[data-cell="5"],
-.cell[data-cell="6"] {
+.cell[data-cell="5"] {
     border-top: 2px solid black;
     border-bottom: 2px solid black;
 }
