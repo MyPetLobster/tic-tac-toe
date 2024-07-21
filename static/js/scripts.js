@@ -19,7 +19,7 @@ const selectRandomIcon = (player) => {
 };
 
 const areWeBeingLazy = () => {
-    return Math.random() < 0.5; // 1 in 20 chance
+    return Math.random() < 0.1; // 1 in 20 chance
 };
 
 // Gameboard module
@@ -34,6 +34,24 @@ const gameBoard = (() => {
     };
     return { getGameBoard, setGameBoard, resetGameBoard };
 })();
+
+
+// Set status color
+function setStatusColor() {
+    const header = document.querySelector("h1");
+    const status = document.querySelector(".status");
+    if (status.textContent === "X's Turn") {
+        header.style.color = "var(--primary-blue)";
+        status.style.color = "var(--primary-blue)";
+    } else if (status.textContent === "O's Turn") {
+        header.style.color = "var(--primary-light)";
+        status.style.color = "var(--primary-light)";
+    } else {
+        header.style.color = "var(--primary-dark)";
+        status.style.color = "var(--primary-dark)";
+    }
+}
+
 
 // Display controller module
 const displayController = (() => {
@@ -52,7 +70,7 @@ const displayController = (() => {
                     iconImgElement.alt = value;
                     cells[index].appendChild(iconImgElement);
                 }
-            }
+            }        
         });
     };
     const setStatus = (message) => {
@@ -63,6 +81,7 @@ const displayController = (() => {
     };
     return { render, setStatus, setRestartButton };
 })();
+
 
 // Game controller module
 const gameController = (() => {
@@ -123,13 +142,15 @@ const gameController = (() => {
         if (checkTie()) {
             gameActive = false;
             displayController.setStatus("It's a tie!");
+            setStatusColor();
             displayController.setRestartButton("Restart");
             return;
         }
         currentPlayer = currentPlayer === "X" ? "O" : "X";
         displayController.setStatus(
-            currentPlayer === "X" ? "Player 1's Turn" : "Player 2's Turn"
+            currentPlayer === "X" ? "X's Turn" : "O's Turn"
         );
+        setStatusColor();
     };
 
     const handleRestart = () => {
@@ -137,11 +158,14 @@ const gameController = (() => {
         gameActive = true;
         currentPlayer = "X";
         displayController.render();
-        displayController.setStatus("Player 1's Turn");
+        displayController.setStatus("X's Turn");
         displayController.setRestartButton("Restart");
     };
     return { handleCellClick, handleRestart };
 })();
+
+
+
 
 // Event listeners
 document.querySelectorAll(".cell").forEach((cell) => {
@@ -150,4 +174,5 @@ document.querySelectorAll(".cell").forEach((cell) => {
 document.querySelector(".restart-button").addEventListener("click", gameController.handleRestart);
 
 // Initial render
+setStatusColor();
 displayController.render();

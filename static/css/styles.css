@@ -42,8 +42,9 @@ a {
 /* COLOR VARIABLES */
 :root {
     --primary-dark: #000000;
-    --primary-light: #ffffff;
+    --primary-light: #e0e0e0;
     --bg-grey: #8d8d8d;
+    --primary-blue: #031341;
 }
 
 
