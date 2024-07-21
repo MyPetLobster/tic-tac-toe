@@ -1,3 +1,20 @@
+// Select Random X-man
+const selectRandomIcon = (player) => {
+    let num = Math.floor(Math.random() * 6) + 1;
+    if (num < 10) {
+        num = "0" + num;
+    }
+    if (player === "X") {
+        return `static/images/game_icons/x_icons/xman-${num}.png`;
+    } else {
+        return`static/images/game_icons/o_icons/oman-${num}.png`
+    }
+};
+
+
+
+
+
 // Gameboard module
 const gameBoard = (() => {
     let gameBoard = ["", "", "", "", "", "", "", "", ""];
@@ -18,7 +35,17 @@ const displayController = (() => {
     const restartButton = document.querySelector(".restart-button");
     const render = () => {
         gameBoard.getGameBoard().forEach((value, index) => {
-            cells[index].innerHTML = value;
+            if (value === "") {
+                cells[index].innerHTML = "";
+            } else {
+                if (!cells[index].firstChild) {
+                    const randomIcon = selectRandomIcon(value);
+                    const iconImgElement = document.createElement("img");
+                    iconImgElement.src = randomIcon;
+                    iconImgElement.alt = value;
+                    cells[index].appendChild(iconImgElement);
+                }
+            }
         });
     };
     const setStatus = (message) => {
