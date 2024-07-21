@@ -1,0 +1,41 @@
+@font-face {
+    font-family: "2Dumb";
+    src: 
+        url("../fonts/2Dumb-webfont.woff") format("woff");
+    font-weight: normal;
+    font-style: normal;
+}
+
+@font-face {
+    font-family: "3Dumb";
+    src: 
+        url("../fonts/3Dumb-webfont.woff") format("woff");
+    font-weight: normal;
+    font-style: normal;
+}
+
+@font-face {
+    font-family: "gaegu";
+    src: 
+        url("../fonts/gaegu-regular-webfont.woff") format("woff"),
+        url("../fonts/gaegu-regular-webfont.woff2") format("woff2");
+    font-weight: normal;
+    font-style: normal;
+}
+@font-face {
+    font-family: "gaegu";
+    src: 
+        url("../fonts/gaegu-bold-webfont.woff") format("woff"),
+        url("../fonts/gaegu-bold-webfont.woff2") format("woff2");
+    font-weight: bold;
+    font-style: normal;
+}
+
+@font-face {
+    font-family: "gaegu";
+    src: 
+        url("../fonts/gaegu-light-webfont.woff") format("woff"),
+        url("../fonts/gaegu-light-webfont.woff2") format("woff2");
+    font-weight: lighter;
+    font-style: normal;
+}
