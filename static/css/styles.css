@@ -10,11 +10,12 @@
 
 
 /* GENERAL/TOP LEVEL */
-.body {
+body {
     height: 100vh;
     width: 100%;
     margin: 0;
     padding: 0;
+    
 }
 .page-content {
     display: flex;
@@ -23,6 +24,7 @@
     align-items: center;
     height: 100vh;
     width: 100%;
+    background-color: rgb(137, 137, 137);
 }
 
 
@@ -40,6 +42,11 @@
     align-items: center;
     padding: 1em;
     cursor: pointer;
+}
+.cell>img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
 }
 .cell[data-cell="2"],
 .cell[data-cell="5"],
