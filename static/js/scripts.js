@@ -1,4 +1,11 @@
-// Select Random X-man
+const selectLazyIcon = (player) => {
+    if (player === "X") {
+        return "static/images/game_icons/lazy_icons/xman-lazy.png";
+    } else {
+        return "static/images/game_icons/lazy_icons/oman-lazy.png";
+    }
+};
+
 const selectRandomIcon = (player) => {
     let num = Math.floor(Math.random() * 6) + 1;
     if (num < 10) {
@@ -7,13 +14,13 @@ const selectRandomIcon = (player) => {
     if (player === "X") {
         return `static/images/game_icons/x_icons/xman-${num}.png`;
     } else {
-        return`static/images/game_icons/o_icons/oman-${num}.png`
+        return `static/images/game_icons/o_icons/oman-${num}.png`
     }
 };
 
-
-
-
+const areWeBeingLazy = () => {
+    return Math.random() < 0.5; // 1 in 20 chance
+};
 
 // Gameboard module
 const gameBoard = (() => {
@@ -89,13 +96,23 @@ const gameController = (() => {
         return gameBoard.getGameBoard().every((cell) => cell !== "");
     };
     const handleCellClick = (e) => {
-        const cell = e.target;
+        const cell = e.target.closest('.cell');
         const index = parseInt(cell.getAttribute("data-cell"));
         if (gameBoard.getGameBoard()[index] !== "" || !gameActive) {
             return;
         }
-        gameBoard.setGameBoard(index, currentPlayer);
-        displayController.render();
+        const currentPlayerIcon = currentPlayer;
+        gameBoard.setGameBoard(index, currentPlayerIcon);
+        if (areWeBeingLazy()) {
+            const lazyIcon = selectLazyIcon(currentPlayerIcon);
+            cell.innerHTML = `<img src="${lazyIcon}" alt="${currentPlayerIcon}">`;
+            setTimeout(() => {
+                const randomIcon = selectRandomIcon(currentPlayerIcon);
+                cell.innerHTML = `<img src="${randomIcon}" alt="${currentPlayerIcon}">`;
+            }, 1000);
+        } else {
+            displayController.render();
+        }
         const winner = checkWinner();
         if (winner) {
             gameActive = false;
@@ -114,6 +131,7 @@ const gameController = (() => {
             currentPlayer === "X" ? "Player 1's Turn" : "Player 2's Turn"
         );
     };
+
     const handleRestart = () => {
         gameBoard.resetGameBoard();
         gameActive = true;
