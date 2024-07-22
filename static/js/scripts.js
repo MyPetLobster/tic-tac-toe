@@ -30,6 +30,21 @@ const selectLazyIcon = (player) => {
 };
 
 
+const checkCurrentPage = () => {
+    const pageIdentifier = document.querySelector(".page-identifier");
+    const currentPage = pageIdentifier.getAttribute("data-page");
+    if (currentPage === "home") {
+        document.querySelector(".about-link").classList.remove("active-nav");
+        document.querySelector(".home-link").classList.add("active-nav");
+    } else if (currentPage === "about") {
+        document.querySelector(".home-link").classList.remove("active-nav");
+        document.querySelector(".about-link").classList.add("active-nav");
+    }
+    return currentPage
+};
+
+
+
 // GAME BOARD MODULE
 // #4 is there some way to remove repetition of Array(9).fill("")?
 const gameBoard = (() => {
@@ -277,11 +292,21 @@ const gameController = (() => {
 
 // #25 Should I move this into a module?
 // Event listeners
-document.querySelectorAll(".cell").forEach((cell) => {
-    cell.addEventListener("click", gameController.handleCellClick);
-});
-document.querySelector(".restart-button").addEventListener("click", gameController.handleRestart);
+const page = checkCurrentPage();
+if (page === "home") {
+    document.querySelectorAll(".cell").forEach((cell) => {
+        cell.addEventListener("click", gameController.handleCellClick);
+    });
+    document.querySelector(".restart-button").addEventListener("click", gameController.handleRestart);
 
-// Initial render
-setStatusColor();
-displayController.render();
+    // Initial render
+    setStatusColor();
+    displayController.render();
+}
+
+const navLinks = document.querySelectorAll(".nav-link");
+navLinks.forEach((link) => {
+    checkCurrentPage();
+});
+
+

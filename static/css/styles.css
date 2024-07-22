@@ -39,7 +39,7 @@ a {
 }
 
 
-/* COLOR VARIABLES */
+/* ---- COLOR VARIABLES ---- */
 :root {
     --primary-dark: #000000;
     --primary-light: #e0e0e0;
@@ -50,7 +50,7 @@ a {
 }
 
 
-/* GENERAL/TOP LEVEL */
+/* ---- GENERAL/TOP LEVEL ---- */
 body {
     height: 100vh;
     width: 100%;
@@ -113,7 +113,46 @@ button:active {
 }
 
 
-/* GAME BOARD */
+/* ---- NAVIGATION ---- */
+nav {
+    width: 100%;
+    position: sticky;
+    top: 0;
+    padding: 0.5em 1em;
+    z-index: 100;
+}
+nav > ul {
+    width: 100%;
+    display: flex;
+    justify-content: flex-end;
+    gap: 4rem;
+}
+li {
+    transition: 250ms;
+    color: var(--primary-light);
+}
+li:hover {
+    color: var(--primary-blue);
+    transform: scale(1.1);
+}
+.active-nav {
+    color: var(--primary-blue) !important;
+    font-weight: bold !important;
+    text-decoration: underline !important;
+}
+.svg-container > svg {
+    border-radius: 50%;
+    transition: 250ms;
+    box-shadow: 0 0 8px 0 rgba(0, 0, 0, 0.196);
+    fill: var(--primary-light);
+}
+.svg-container > svg:hover {
+    transform: scale(1.1);
+    box-shadow: 0 0 12px 0 rgba(0, 0, 0, 0.196);
+    fill: var(--primary-blue);
+}
+
+/* ---- GAME BOARD ---- */
 .game-board {
     display: grid;
     grid-template-columns: repeat(3, 1fr);
@@ -151,7 +190,7 @@ button:active {
 }
 
 
-/* STATUS and CONTROLS */
+/* ---- STATUS and CONTROLS ---- */
 .status-controls-div {
     width: 100%;
     display: flex;
@@ -232,3 +271,15 @@ button:active {
     color: var(--primary-dark) !important;
     background-color: var(--primary-light) !important;
 }
+
+
+.page-identifier {
+    opacity: 0;
+    position: absolute;
+}
+
+
+
+
+
+/* ---- MEDIA QUERIES ---- */
