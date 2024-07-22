@@ -129,7 +129,7 @@ button:active {
     display: flex;
     justify-content: center;
     align-items: center;
-    padding: 1em;
+    padding: 0.5em;
     cursor: pointer;
 }
 .cell>img {
@@ -140,14 +140,14 @@ button:active {
 .cell[data-cell="1"],
 .cell[data-cell="4"],
 .cell[data-cell="7"] {
-    border-left: 2px solid black;
-    border-right: 2px solid black;
+    border-left: 3px solid black;
+    border-right: 3px solid black;
 } 
 .cell[data-cell="3"],
 .cell[data-cell="4"],
 .cell[data-cell="5"] {
-    border-top: 2px solid black;
-    border-bottom: 2px solid black;
+    border-top: 3px solid black;
+    border-bottom: 3px solid black;
 }
 
 
@@ -191,4 +191,44 @@ button:active {
     opacity: 0.2;
     /* blur */
     filter: blur(3px);
+}
+
+.btn-box {
+    width: 100%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    position: relative;
+}
+.restart-button {
+    transition: 500ms;
+}
+.winner-btn-tie,
+.winner-btn-blue,
+.winner-btn-light {
+    font-weight: bold;
+    position: absolute !important;
+    transform: translateY(-150px);
+}
+.winner-btn-tie:hover,
+.winner-btn-blue:hover,
+.winner-btn-light:hover {
+    position: absolute !important;
+    transform: translateY(-150px);
+}
+.winner-btn-blue {
+    color: var(--primary-blue) !important;
+    border: 2px solid var(--primary-blue) !important;
+}
+.winner-btn-blue:hover {
+    color: var(--primary-light) !important;
+    background-color: var(--primary-blue) !important;
+}
+.winner-btn-light {
+    color: var(--primary-light) !important;
+    border: 2px solid var(--primary-light) !important;
+}
+.winner-btn-light:hover {
+    color: var(--primary-dark) !important;
+    background-color: var(--primary-light) !important;
 }

@@ -136,7 +136,7 @@ const gameController = (() => {
         if (winner) {
             gameActive = false;
             displayController.setStatus(`${winner} wins!`);
-            displayController.setRestartButton("Restart");
+            displayController.setRestartButton("New Game");
 
             const endScreen = document.querySelector(".end-screen")
             const winnerText = document.createElement("h1");
@@ -144,28 +144,64 @@ const gameController = (() => {
             endScreen.appendChild(winnerText);
 
             const gameBoard = document.querySelector(".game-board");
+            const restartButton = document.querySelector(".restart-button");
+
             gameBoard.classList.add("fade");
+            
             if (winner === "X") {
                 endScreen.style.backgroundColor = "var(--primary-blue-opc)";
                 endScreen.style.color = "var(--primary-blue)";
+                restartButton.classList.add("winner-btn-blue");
+
             } else { 
                 endScreen.style.backgroundColor = "var(--primary-light-opc)";
                 endScreen.style.color = "var(--primary-light)";
+                restartButton.classList.add("winner-btn-light");
             }
+
             endScreen.classList.add("show");
-            setTimeout(() => {
+
+            restartButton.addEventListener("click", () => {
                 endScreen.classList.remove("show");
                 endScreen.removeChild(winnerText);
                 gameBoard.classList.remove("fade");
-            }, 3000);
-
+                if (winner === "X") {
+                    restartButton.classList.remove("winner-btn-blue");
+                } else {
+                    restartButton.classList.remove("winner-btn-light");
+                }
+            });
+            displayController.render();
             return;
         }
         if (checkTie()) {
             gameActive = false;
             displayController.setStatus("It's a tie!");
             setStatusColor();
-            displayController.setRestartButton("Restart");
+            displayController.setRestartButton("New Game");
+
+            const endScreen = document.querySelector(".end-screen");
+            const winnerText = document.createElement("h1");
+            winnerText.textContent = "It's a tie!";
+            endScreen.appendChild(winnerText);
+
+            const gameBoard = document.querySelector(".game-board");
+            const restartButton = document.querySelector(".restart-button");
+
+            gameBoard.classList.add("fade");
+            endScreen.style.backgroundColor = "var(--primary-dark-opc)";
+            endScreen.style.color = "var(--primary-dark)";
+            restartButton.classList.add("winner-btn-tie");
+            endScreen.classList.add("show");
+
+            restartButton.addEventListener("click", () => {
+                endScreen.classList.remove("show");
+                endScreen.removeChild(winnerText);
+                gameBoard.classList.remove("fade");
+                restartButton.classList.remove("winner-btn-tie");
+            });
+
+            displayController.render();
             return;
         }
         currentPlayer = currentPlayer === "X" ? "O" : "X";
@@ -181,6 +217,7 @@ const gameController = (() => {
         currentPlayer = "X";
         displayController.render();
         displayController.setStatus("X's Turn");
+        setStatusColor();
         displayController.setRestartButton("Restart");
     };
     return { handleCellClick, handleRestart };
