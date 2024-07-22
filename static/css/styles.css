@@ -120,7 +120,8 @@ button:active {
     grid-template-rows: repeat(3, 1fr);
     width: 450px;
     height: 450px;
-    border-radius: 1em;
+    border-bottom-left-radius: 1em;
+    border-bottom-right-radius: 1em;
     transition: 300ms;
     opacity: 1;
 }
