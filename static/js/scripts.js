@@ -162,8 +162,8 @@ const gameController = (() => {
             endScreen.classList.add("show");
 
             restartButton.addEventListener("click", () => {
-                endScreen.classList.remove("show");
                 endScreen.removeChild(winnerText);
+                endScreen.classList.remove("show");
                 gameBoard.classList.remove("fade");
                 if (winner === "X") {
                     restartButton.classList.remove("winner-btn-blue");
@@ -195,8 +195,8 @@ const gameController = (() => {
             endScreen.classList.add("show");
 
             restartButton.addEventListener("click", () => {
-                endScreen.classList.remove("show");
                 endScreen.removeChild(winnerText);
+                endScreen.classList.remove("show");
                 gameBoard.classList.remove("fade");
                 restartButton.classList.remove("winner-btn-tie");
             });
