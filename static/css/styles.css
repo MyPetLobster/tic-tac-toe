@@ -45,6 +45,8 @@ a {
     --primary-light: #e0e0e0;
     --bg-grey: #8d8d8d;
     --primary-blue: #031341;
+    --primary-light-opc: #e0e0e072;
+    --primary-blue-opc: #03124172;
 }
 
 
@@ -118,6 +120,9 @@ button:active {
     grid-template-rows: repeat(3, 1fr);
     width: 450px;
     height: 450px;
+    border-radius: 1em;
+    transition: 300ms;
+    opacity: 1;
 }
 .cell {
     display: flex;
@@ -153,4 +158,36 @@ button:active {
     justify-content: center;
     align-items: center;
     gap: 1rem;
+}
+
+.game-board-container {
+    position: relative;
+    overflow: hidden;
+}
+.end-screen {
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    transform: translateY(-100%);
+    transition: transform 300ms ease-in-out;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    gap: 1rem;
+    width: 100%;
+    height: 100%;
+    border-radius: 1em;
+    font-size: 24px;
+}
+.show {
+    transform: translateY(0);
+}
+
+.fade {
+    opacity: 0.2;
+    /* blur */
+    filter: blur(3px);
 }

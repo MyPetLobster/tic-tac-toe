@@ -137,6 +137,28 @@ const gameController = (() => {
             gameActive = false;
             displayController.setStatus(`${winner} wins!`);
             displayController.setRestartButton("Restart");
+
+            const endScreen = document.querySelector(".end-screen")
+            const winnerText = document.createElement("h1");
+            winnerText.textContent = `${winner} wins!`;
+            endScreen.appendChild(winnerText);
+
+            const gameBoard = document.querySelector(".game-board");
+            gameBoard.classList.add("fade");
+            if (winner === "X") {
+                endScreen.style.backgroundColor = "var(--primary-blue-opc)";
+                endScreen.style.color = "var(--primary-blue)";
+            } else { 
+                endScreen.style.backgroundColor = "var(--primary-light-opc)";
+                endScreen.style.color = "var(--primary-light)";
+            }
+            endScreen.classList.add("show");
+            setTimeout(() => {
+                endScreen.classList.remove("show");
+                endScreen.removeChild(winnerText);
+                gameBoard.classList.remove("fade");
+            }, 3000);
+
             return;
         }
         if (checkTie()) {
