@@ -45,8 +45,8 @@ a {
     --primary-light: #e0e0e0;
     --bg-grey: #8d8d8d;
     --primary-blue: #031341;
-    --primary-light-opc: #e0e0e072;
-    --primary-blue-opc: #03124172;
+    --primary-light-opc: #e0e0e03b;
+    --primary-blue-opc: #0312413b;
 }
 
 
@@ -277,6 +277,30 @@ li:hover {
     position: absolute;
 }
 
+
+
+/* ABOUT PAGE */
+.about-page-container {
+    height: 95vh;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: flex-start;
+    gap: 2em;
+    text-align: center;
+}
+.about-content {
+    width: 80%;
+    font-size: 1.1em;
+}
+.breakmen-div {
+    width: 80%;
+    display: flex;
+    justify-content: space-around;
+}
+.breakmen-div > img {
+    width: 30%;
+}
 
 
 
