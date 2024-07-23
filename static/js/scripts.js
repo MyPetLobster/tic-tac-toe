@@ -1,7 +1,4 @@
-
-
-
-// GAME BOARD MODULE
+// GAME BOARD MODULE 
 const gameBoard = (() => {
     const EMPTY_BOARD = Array(9).fill("");
     let gameBoard = [...EMPTY_BOARD];
@@ -13,9 +10,9 @@ const gameBoard = (() => {
     const resetGameBoard = () => {
         gameBoard = [...EMPTY_BOARD];
     };
+
     return { getGameBoard, setGameBoard, resetGameBoard };
 })();
-
 
 
 // DISPLAY CONTROLLER MODULE
@@ -24,17 +21,17 @@ const displayController = (() => {
     const status = document.querySelector(".status");
     const restartButton = document.querySelector(".restart-button");
 
+    const selectRandomIcon = (isX) => {
+        let num = Math.floor(Math.random() * 6) + 1;
+        num = num < 10 ? "0" + num : num;  // format string for image path
+        return isX ? `static/images/game_icons/x_icons/xman-${num}.png` : `static/images/game_icons/o_icons/oman-${num}.png`;
+    };
+
     const render = () => {
         gameBoard.getGameBoard().forEach((value, index) => {
             if (value === "") {
                 cells[index].innerHTML = "";
-            } else if (!cells[index].firstChild) {     // Make sure cell is unoccupied
-                const randomIcon = selectRandomIcon(value);
-                const iconImgElement = document.createElement("img");
-                iconImgElement.src = randomIcon;
-                iconImgElement.alt = value;
-                cells[index].appendChild(iconImgElement);
-            }        
+            } 
         });
     };
 
@@ -43,49 +40,44 @@ const displayController = (() => {
     };
 
     const setStatusColor = () => {
-        const header = document.querySelector("h1");
-        if (status.textContent === "X's Turn") {
-            header.style.color = "var(--primary-blue)";
-            status.style.color = "var(--primary-blue)";
-        } else if (status.textContent === "O's Turn") {
-            header.style.color = "var(--primary-light)";
-            status.style.color = "var(--primary-light)";
-        } else {
-            header.style.color = "var(--primary-dark)";
-            status.style.color = "var(--primary-dark)";
-        }
+        const header = document.querySelector("h1")
+        const color = status.textContent === "X's Turn" ? "var(--primary-blue)" : "var(--primary-light)";
+
+        header.style.color = color;
+        status.style.color = color;    
     };
 
     const setRestartButton = (message) => {
         restartButton.textContent = message;
     };
-    return { render, setStatus, setStatusColor, setRestartButton };
+
+    const updateCellIcon = (cell, player) => {
+        const randomIcon = selectRandomIcon(player === "X");
+        cell.innerHTML = `<img src="${randomIcon}" alt="${player}">`;
+    };
+
+    const setLazyIcon = (cell, player, callback) => {
+        const lazyIcon = player === "X" ? "static/images/game_icons/lazy_icons/xman-lazy.png" : "static/images/game_icons/lazy_icons/oman-lazy.png";
+        
+        cell.innerHTML = `<img src="${lazyIcon}" alt="${player}">`;
+        setTimeout(callback, 600);
+    };
+
+    return { render, setStatus, setStatusColor, setRestartButton, updateCellIcon, setLazyIcon };
 })();
+
 
 // GAME CONTROLLER MODULE
 const gameController = (() => {
-    let currentPlayerIsX = true; // Boolean to track current player
+    let currentPlayerIsX = true;
     let gameActive = true;
     const winningConditions = [
-        [0, 1, 2],
-        [3, 4, 5],
-        [6, 7, 8],
-        [0, 3, 6],
-        [1, 4, 7],
-        [2, 5, 8],
-        [0, 4, 8],
-        [2, 4, 6],
+        [0, 1, 2], [3, 4, 5], [6, 7, 8],  // horizontal
+        [0, 3, 6], [1, 4, 7], [2, 5, 8],  // vertical
+        [0, 4, 8], [2, 4, 6]              // diagonal
     ];
-
-    const selectRandomIcon = (isX) => {
-        let num = Math.floor(Math.random() * 6) + 1;
-        num = num < 10 ? "0" + num : num;
-        return isX ? `static/images/game_icons/x_icons/xman-${num}.png` : `static/images/game_icons/o_icons/oman-${num}.png`;
-    };
-
-    const areWeBeingLazy = () => Math.random() < 0.1;
-
-    const selectLazyIcon = (isX) => isX ? "static/images/game_icons/lazy_icons/xman-lazy.png" : "static/images/game_icons/lazy_icons/oman-lazy.png";
+    
+    const areWeBeingLazy = () => Math.random() < 0.1; // 10% chance of being lazy
 
     const checkWinner = () => {
         let winner = null;
@@ -102,23 +94,26 @@ const gameController = (() => {
     };
 
     const checkTie = () => {
-        return gameBoard.getGameBoard().every(cell => cell !== "");
+        return gameBoard.getGameBoard().every(cell => cell !== "")
     };
 
     const handleEndGame = (winner) => {
         gameActive = false;
-        displayController.setStatus(winner ? `${winner} wins!` : "It's a tie!");
-        displayController.setRestartButton("New Game");
+        // TODO - use backdrop-filter for blur effect
+        const winningMessage = winner ? `${winner} wins!` : "It's a tie!";
+
+        displayController.setStatus(winningMessage);
+        displayController.setRestartButton("Play Again");
 
         const endScreen = document.querySelector(".end-screen");
         const winnerText = document.createElement("h1");
-        winnerText.textContent = winner ? `${winner} wins!` : "It's a tie!";
+        winnerText.textContent = winningMessage;
         endScreen.appendChild(winnerText);
 
         const gameBoardElement = document.querySelector(".game-board");
-        gameBoardElement.classList.add("fade");
+        gameBoardElement.classList.add("fade")
 
-        const restartButton = document.querySelector(".restart-button");
+        const  restartButton = document.querySelector(".restart-button");
 
         if (winner) {
             const colorClass = winner === "X" ? "blue" : "light";
@@ -127,8 +122,8 @@ const gameController = (() => {
             restartButton.classList.add(`winner-btn-${colorClass}`);
         } else {
             endScreen.style.backgroundColor = "var(--primary-dark-opc)";
-            endScreen.style.color = "var(--primary-dark)";
-            restartButton.classList.add("winner-btn-tie");
+            endScreen.style.color = `var(--primary-dark)`;
+            restartButton.classList.add("winner-tie-btn");
         }
 
         endScreen.classList.add("show");
@@ -144,30 +139,25 @@ const gameController = (() => {
     };
 
     const handleCellClick = (e) => {
-        const cell = e.target.closest('.cell');
+        const cell = e.target.closest(".cell");
         const index = Number(cell.getAttribute("data-cell"));
-        if (isNaN(index) || gameBoard.getGameBoard()[index] !== "" || !gameActive) {
-            return;
-        }
+
+        // Check if cell is valid
+        if (isNaN(index) || gameBoard.getGameBoard()[index] !== "" || !gameActive) return;
 
         const currentPlayer = currentPlayerIsX ? "X" : "O";
         gameBoard.setGameBoard(index, currentPlayer);
 
-        const updateCellIcon = () => {
-            const randomIcon = selectRandomIcon(currentPlayerIsX);
-            cell.innerHTML = `<img src="${randomIcon}" alt="${currentPlayer}">`;
-        };
-
         if (areWeBeingLazy()) {
-            const lazyIcon = selectLazyIcon(currentPlayerIsX);
-            cell.innerHTML = `<img src="${lazyIcon}" alt="${currentPlayer}">`;
-            setTimeout(updateCellIcon, 700);
+            displayController.setLazyIcon(cell, currentPlayer, () => {
+                displayController.updateCellIcon(cell, currentPlayer);
+            });
         } else {
-            updateCellIcon();
+            displayController.updateCellIcon(cell, currentPlayer);
         }
 
         const winner = checkWinner();
-        if (winner) {
+        if (winner) { 
             handleEndGame(winner);
             return;
         }
@@ -178,9 +168,7 @@ const gameController = (() => {
         }
 
         currentPlayerIsX = !currentPlayerIsX;
-        displayController.setStatus(
-            currentPlayerIsX ? "X's Turn" : "O's Turn"
-        );
+        displayController.setStatus(currentPlayerIsX ? "X's Turn" : "O's Turn");
         displayController.setStatusColor();
     };
 
@@ -200,18 +188,18 @@ const gameController = (() => {
 
 // INITIALIZATION MODULE
 const init = (() => {
-    const checkCurrentPage = () => {
-        const pageIdentifier = document.querySelector(".page-identifier");
-        const currentPage = pageIdentifier.getAttribute("data-page");
-        if (currentPage === "home") {
-            document.querySelector(".about-link").classList.remove("active-nav");
-            document.querySelector(".home-link").classList.add("active-nav");
-        } else if (currentPage === "about") {
-            document.querySelector(".home-link").classList.remove("active-nav");
-            document.querySelector(".about-link").classList.add("active-nav");
-        }
-        return currentPage;
-    };
+const checkCurrentPage = () => {
+    const pageIdentifier = document.querySelector(".page-identifier");
+    const currentPage = pageIdentifier.getAttribute("data-page");
+    const activeLink = document.querySelector(`.${currentPage}-link`);
+    const inactiveLink = document.querySelector(`.${currentPage === "home" ? "about" : "home"}-link`);
+
+    activeLink.classList.add("active-nav");
+    inactiveLink.classList.remove("active-nav");
+
+    return currentPage;
+};
+
 
     const page = checkCurrentPage();
     if (page === "home") {
@@ -220,15 +208,10 @@ const init = (() => {
         });
         document.querySelector(".restart-button").addEventListener("click", gameController.handleRestart);
 
-        // Initial render
+        // Initial Render
         displayController.setStatusColor();
         displayController.render();
     }
-
-    const navLinks = document.querySelectorAll(".nav-link");
-    navLinks.forEach((link) => {
-        checkCurrentPage();
-    });
+    
+    checkCurrentPage();
 })();
-
-
