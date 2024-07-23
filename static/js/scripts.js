@@ -62,10 +62,9 @@ const displayController = (() => {
     return { render, setStatus, setStatusColor, setRestartButton };
 })();
 
-
 // GAME CONTROLLER MODULE
 const gameController = (() => {
-    let currentPlayer = "X";
+    let currentPlayerIsX = true; // Boolean to track current player
     let gameActive = true;
     const winningConditions = [
         [0, 1, 2],
@@ -78,158 +77,109 @@ const gameController = (() => {
         [2, 4, 6],
     ];
 
+    const selectRandomIcon = (isX) => {
+        let num = Math.floor(Math.random() * 6) + 1;
+        num = num < 10 ? "0" + num : num;
+        return isX ? `static/images/game_icons/x_icons/xman-${num}.png` : `static/images/game_icons/o_icons/oman-${num}.png`;
+    };
+
+    const areWeBeingLazy = () => Math.random() < 0.1;
+
+    const selectLazyIcon = (isX) => isX ? "static/images/game_icons/lazy_icons/xman-lazy.png" : "static/images/game_icons/lazy_icons/oman-lazy.png";
+
     const checkWinner = () => {
         let winner = null;
-        winningConditions.forEach((condition) => {
-            // TODO - Bitwise win check
-            const [a, b, c] = condition;
+        winningConditions.forEach(([a, b, c]) => {
             if (
                 gameBoard.getGameBoard()[a] &&
                 gameBoard.getGameBoard()[a] === gameBoard.getGameBoard()[b] &&
                 gameBoard.getGameBoard()[a] === gameBoard.getGameBoard()[c]
-                ) {
-                    winner = gameBoard.getGameBoard()[a];
+            ) {
+                winner = gameBoard.getGameBoard()[a];
             }
         });
         return winner;
     };
 
-    const selectRandomIcon = (player) => {
-        let num = Math.floor(Math.random() * 6) + 1;
-        if (num < 10) {
-            num = "0" + num;
-        }
-        if (player === "X") {
-            return `static/images/game_icons/x_icons/xman-${num}.png`;
-        } else {
-            return `static/images/game_icons/o_icons/oman-${num}.png`
-        }
-    };
-
-    // Return true 10% of the time
-    const areWeBeingLazy = () => {
-        return Math.random() < 0.1;
-    };
-
-    // Return the correct lazy icon based on the player
-    const selectLazyIcon = (player) => player === "X" ? "static/images/game_icons/lazy_icons/xman-lazy.png" : "static/images/game_icons/lazy_icons/oman-lazy.png";
-
     const checkTie = () => {
-        return gameBoard.getGameBoard().every((cell) => cell !== "");
+        return gameBoard.getGameBoard().every(cell => cell !== "");
+    };
+
+    const handleEndGame = (winner) => {
+        gameActive = false;
+        displayController.setStatus(winner ? `${winner} wins!` : "It's a tie!");
+        displayController.setRestartButton("New Game");
+
+        const endScreen = document.querySelector(".end-screen");
+        const winnerText = document.createElement("h1");
+        winnerText.textContent = winner ? `${winner} wins!` : "It's a tie!";
+        endScreen.appendChild(winnerText);
+
+        const gameBoardElement = document.querySelector(".game-board");
+        gameBoardElement.classList.add("fade");
+
+        const restartButton = document.querySelector(".restart-button");
+
+        if (winner) {
+            const colorClass = winner === "X" ? "blue" : "light";
+            endScreen.style.backgroundColor = `var(--primary-${colorClass}-opc)`;
+            endScreen.style.color = `var(--primary-${colorClass})`;
+            restartButton.classList.add(`winner-btn-${colorClass}`);
+        } else {
+            endScreen.style.backgroundColor = "var(--primary-dark-opc)";
+            endScreen.style.color = "var(--primary-dark)";
+            restartButton.classList.add("winner-btn-tie");
+        }
+
+        endScreen.classList.add("show");
+
+        restartButton.addEventListener("click", () => {
+            endScreen.removeChild(winnerText);
+            endScreen.classList.remove("show");
+            gameBoardElement.classList.remove("fade");
+            restartButton.classList.remove(`winner-btn-${winner ? winner === "X" ? "blue" : "light" : "tie"}`);
+        });
+
+        displayController.render();
     };
 
     const handleCellClick = (e) => {
-        // TODO - Test this using just e.target
         const cell = e.target.closest('.cell');
         const index = Number(cell.getAttribute("data-cell"));
-
         if (isNaN(index) || gameBoard.getGameBoard()[index] !== "" || !gameActive) {
-            return; // If cell is already occupied or game is over, do nothing
+            return;
         }
 
+        const currentPlayer = currentPlayerIsX ? "X" : "O";
         gameBoard.setGameBoard(index, currentPlayer);
 
         const updateCellIcon = () => {
-            const randomIcon = selectRandomIcon(currentPlayer);
+            const randomIcon = selectRandomIcon(currentPlayerIsX);
             cell.innerHTML = `<img src="${randomIcon}" alt="${currentPlayer}">`;
         };
 
         if (areWeBeingLazy()) {
-            const lazyIcon = selectLazyIcon(currentPlayer);
+            const lazyIcon = selectLazyIcon(currentPlayerIsX);
             cell.innerHTML = `<img src="${lazyIcon}" alt="${currentPlayer}">`;
             setTimeout(updateCellIcon, 700);
         } else {
             updateCellIcon();
         }
 
-        // #18 Definitely need to refactor this and remove the repetition
         const winner = checkWinner();
         if (winner) {
-            gameActive = false;
-            displayController.setStatus(`${winner} wins!`);
-            displayController.setRestartButton("New Game");
-
-            // Create end screen for winner
-            const endScreen = document.querySelector(".end-screen")
-            const winnerText = document.createElement("h1");
-            winnerText.textContent = `${winner} wins!`;
-            endScreen.appendChild(winnerText);
-
-            // Fade and blur game board
-            const gameBoard = document.querySelector(".game-board");
-            gameBoard.classList.add("fade");
-
-            // #19 Should I define the variables close to where I use them or is it better to define each
-            // function/block's variables together at the top of the highest level in which they are used?
-            const restartButton = document.querySelector(".restart-button");
-            
-            // #20 Is it possible to use a ternary operator to do all three of these changes in one statement?
-            // #21 Am I overthinking all that and if/else are fine even though I learned cool new things?
-            if (winner === "X") {
-                // #22 Anything wrong with using CSS variables like this? Also...should I use fallbacks in my CSS file
-                // for these variables?
-                endScreen.style.backgroundColor = "var(--primary-blue-opc)";
-                endScreen.style.color = "var(--primary-blue)";
-                restartButton.classList.add("winner-btn-blue");
-
-            } else { 
-                endScreen.style.backgroundColor = "var(--primary-light-opc)";
-                endScreen.style.color = "var(--primary-light)";
-                restartButton.classList.add("winner-btn-light");
-            }
-            endScreen.classList.add("show");
-
-            // #23 I feel like this was a hacky way to make this work. Is there a better way to do this?
-            restartButton.addEventListener("click", () => {
-                endScreen.removeChild(winnerText);
-                endScreen.classList.remove("show");
-                gameBoard.classList.remove("fade");
-                if (winner === "X") {
-                    restartButton.classList.remove("winner-btn-blue");
-                } else {
-                    restartButton.classList.remove("winner-btn-light");
-                }
-            });
-
-            displayController.render();
+            handleEndGame(winner);
             return;
         }
 
         if (checkTie()) {
-            gameActive = false;
-            displayController.setStatus("It's a tie!");
-            displayController.setStatusColor();
-            displayController.setRestartButton("New Game");
-
-            const endScreen = document.querySelector(".end-screen");
-            const winnerText = document.createElement("h1");
-            winnerText.textContent = "It's a tie!";
-            endScreen.appendChild(winnerText);
-
-            const gameBoard = document.querySelector(".game-board");
-            const restartButton = document.querySelector(".restart-button");
-
-            gameBoard.classList.add("fade");
-            endScreen.style.backgroundColor = "var(--primary-dark-opc)";
-            endScreen.style.color = "var(--primary-dark)";
-            restartButton.classList.add("winner-btn-tie");
-            endScreen.classList.add("show");
-
-            restartButton.addEventListener("click", () => {
-                endScreen.removeChild(winnerText);
-                endScreen.classList.remove("show");
-                gameBoard.classList.remove("fade");
-                restartButton.classList.remove("winner-btn-tie");
-            });
-
-            displayController.render();
+            handleEndGame(null);
             return;
         }
 
-        currentPlayer = currentPlayer === "X" ? "O" : "X";
-        // #24 Should I make currentPlayer a boolean instead of a string?
+        currentPlayerIsX = !currentPlayerIsX;
         displayController.setStatus(
-            currentPlayer === "X" ? "X's Turn" : "O's Turn"
+            currentPlayerIsX ? "X's Turn" : "O's Turn"
         );
         displayController.setStatusColor();
     };
@@ -237,7 +187,7 @@ const gameController = (() => {
     const handleRestart = () => {
         gameBoard.resetGameBoard();
         gameActive = true;
-        currentPlayer = "X";
+        currentPlayerIsX = true;
         displayController.render();
         displayController.setStatus("X's Turn");
         displayController.setStatusColor();
@@ -246,7 +196,6 @@ const gameController = (() => {
 
     return { handleCellClick, handleRestart };
 })();
-
 
 
 // INITIALIZATION MODULE
