@@ -63,11 +63,11 @@ body {
 }
 
 button {
-    font-family: 'gaegu', sans-serif;
-    font-size: 1em;
     padding: 0.5em 1em;
     border: none;
     border-radius: 5px;
+    font-family: 'gaegu', sans-serif;
+    font-size: 1em;
     background-color: var(--primary-light);
     cursor: pointer;
 }
@@ -77,9 +77,9 @@ button {
     padding: 0 0 2em 0;
     display: flex;
     flex-direction: column;
+    align-items: center;
     justify-content: space-around;
     gap: 2em;
-    align-items: center;
     background-color: var(--bg-grey);
 }
 h1 {
@@ -89,7 +89,10 @@ h1 {
 h2 {
     font-size: 2em;
 }
-
+.page-identifier {
+    opacity: 0;
+    position: absolute;
+}
 
 /* ---- BUTTONS ---- */
 button {
@@ -158,11 +161,11 @@ li:hover {
 
 /* ---- GAME BOARD ---- */
 .game-board {
+    width: 30vw;
+    height: 30vw;
     display: grid;
     grid-template-columns: repeat(3, 1fr);
     grid-template-rows: repeat(3, 1fr);
-    width: 30vw;
-    height: 30vw;
     border-bottom-left-radius: 1em;
     border-bottom-right-radius: 1em;
     transition: 300ms;
@@ -198,9 +201,9 @@ li:hover {
 .status-controls-div {
     width: 100%;
     display: flex;
-    flex-direction: column;  
+    flex-direction: column; 
+    align-items: center; 
     justify-content: center;
-    align-items: center;
     gap: 1rem;
 }
 
@@ -209,22 +212,22 @@ li:hover {
     overflow: hidden;
 }
 .end-screen {
+    height: 100%;
+    width: 100%;
     position: absolute;
     top: 0;
     left: 0;
     right: 0;
     bottom: 0;
-    transform: translateY(-100%);
-    transition: transform 500ms ease-in-out;
     display: flex;
     flex-direction: column;
     justify-content: center;
     align-items: center;
     gap: 1rem;
-    width: 100%;
-    height: 100%;
     border-radius: 1em;
     font-size: 24px;
+    transform: translateY(-100%);
+    transition: 500ms;
     backdrop-filter: blur(5px);
 }
 .show {
@@ -233,10 +236,10 @@ li:hover {
 
 .btn-box {
     width: 100%;
+    position: relative;
     display: flex;
     align-items: center;
     justify-content: center;
-    position: relative;
 }
 .restart-button {
     transition: 500ms;
@@ -244,9 +247,9 @@ li:hover {
 .winner-btn-tie,
 .winner-btn-blue,
 .winner-btn-light {
-    font-weight: bold;
     position: absolute !important;
     transform: translateY(-150px);
+    font-weight: bold;
 }
 .winner-btn-tie:hover,
 .winner-btn-blue:hover,
@@ -255,16 +258,16 @@ li:hover {
     transform: translateY(-150px);
 }
 .winner-btn-blue {
-    color: var(--primary-blue) !important;
     border: 2px solid var(--primary-blue) !important;
+    color: var(--primary-blue) !important;
 }
 .winner-btn-blue:hover {
     color: var(--primary-light) !important;
     background-color: var(--primary-blue) !important;
 }
 .winner-btn-light {
-    color: var(--primary-light) !important;
     border: 2px solid var(--primary-light) !important;
+    color: var(--primary-light) !important;
 }
 .winner-btn-light:hover {
     color: var(--primary-dark) !important;
@@ -272,14 +275,7 @@ li:hover {
 }
 
 
-.page-identifier {
-    opacity: 0;
-    position: absolute;
-}
-
-
-
-/* ABOUT PAGE */
+/* ---- ABOUT PAGE ---- */
 .about-page-container {
     height: 95vh;
     display: flex;
@@ -308,8 +304,8 @@ li:hover {
 /* ---- MEDIA QUERIES ---- */
 @media screen and (max-width: 1000px) {
     .game-board {
-        width: 40vw;
         height: 40vw;
+        width: 40vw;
     }
     body {
         font-size: 14px;
@@ -318,8 +314,8 @@ li:hover {
 
 @media screen and (max-width: 800px) {
     .game-board {
-        width: 50vw;
         height: 50vw;
+        width: 50vw;
     }
     body {
         font-size: 12px;
@@ -334,8 +330,8 @@ li:hover {
 
 @media screen and (max-width: 600px) {
     .game-board {
-        width: 60vw;
         height: 60vw;
+        width: 60vw;
     }
     .page-content {
         justify-content: center;
@@ -357,8 +353,8 @@ li:hover {
 
 @media screen and (max-width: 400px) {
     .game-board {
-        width: 70vw;
         height: 70vw;
+        width: 70vw;
     }
     .page-content {
         margin-top: 10vh;
@@ -377,8 +373,8 @@ li:hover {
     .winner-btn-tie,
     .winner-btn-blue,
     .winner-btn-light {
-        font-weight: bold;
         position: absolute !important;
+        font-weight: bold;
         transform: translateY(-75px);
     }
     .winner-btn-tie:hover,
@@ -391,8 +387,8 @@ li:hover {
 
 @media screen and (max-width: 360px) {
     .game-board {
-        width: 80vw;
         height: 80vw;
+        width: 80vw;
     }
     body {
         font-size: 8px;
