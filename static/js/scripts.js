@@ -1,3 +1,6 @@
+let aiMode = false;
+
+
 // GAME BOARD MODULE 
 const gameBoard = (() => {
     const EMPTY_BOARD = Array(9).fill("");
@@ -60,7 +63,7 @@ const displayController = (() => {
         const lazyIcon = player === "X" ? "static/images/game_icons/lazy_icons/xman-lazy.png" : "static/images/game_icons/lazy_icons/oman-lazy.png";
         
         cell.innerHTML = `<img src="${lazyIcon}" alt="${player}">`;
-        setTimeout(callback, 600);
+        setTimeout(callback, 750);
     };
 
     return { render, setStatus, setStatusColor, setRestartButton, updateCellIcon, setLazyIcon };
@@ -77,7 +80,7 @@ const gameController = (() => {
         [0, 4, 8], [2, 4, 6]              // diagonal
     ];
     
-    const areWeBeingLazy = () => Math.random() < 0.1; // 10% chance of being lazy
+    const areWeBeingLazy = () => Math.random() < 0.05; // 5% chance of being lazy
 
     const checkWinner = () => {
         let winner = null;
@@ -120,7 +123,7 @@ const gameController = (() => {
         } else {
             endScreen.style.backgroundColor = "var(--primary-dark-opc)";
             endScreen.style.color = `var(--primary-dark)`;
-            restartButton.classList.add("winner-tie-btn");
+            restartButton.classList.add("winner-btn-tie");
         }
 
         endScreen.classList.add("show");
@@ -138,7 +141,6 @@ const gameController = (() => {
         const cell = e.target.closest(".cell");
         const index = Number(cell.getAttribute("data-cell"));
 
-        // Check if cell is valid
         if (isNaN(index) || gameBoard.getGameBoard()[index] !== "" || !gameActive) return;
 
         const currentPlayer = currentPlayerIsX ? "X" : "O";
@@ -147,9 +149,16 @@ const gameController = (() => {
         if (areWeBeingLazy()) {
             displayController.setLazyIcon(cell, currentPlayer, () => {
                 displayController.updateCellIcon(cell, currentPlayer);
+                if (aiMode && currentPlayer === "X") {
+                    // Trigger AI turn after 500ms
+                    setTimeout(aiTurn, 500);
+                }
             });
         } else {
             displayController.updateCellIcon(cell, currentPlayer);
+            if (aiMode && currentPlayer === "X") {
+                setTimeout(aiTurn, 500);
+            }
         }
 
         const winner = checkWinner();
@@ -168,6 +177,91 @@ const gameController = (() => {
         displayController.setStatusColor();
     };
 
+    // Minimax Algorithm
+    const minimax = (board, isMaximizing) => {
+        const scores = { X: -10, O: 10, tie: 0 };
+
+        const winner = gameController.checkWinner();
+        if (winner) {
+            return scores[winner];
+        }
+
+        if (gameController.checkTie()) {
+            return scores.tie;
+        }
+
+        if (isMaximizing) {
+            let bestValue = -Infinity;
+
+            for (let i = 0; i < board.length; i++) {
+                if (board[i] === "") {
+                    board[i] = "O";
+                    let value = minimax(board, false);
+                    board[i] = "";
+                    bestValue = Math.max(value, bestValue);
+                }
+            }
+
+            return bestValue;
+        } else {
+            let bestValue = Infinity;
+
+            for (let i = 0; i < board.length; i++) {
+                if (board[i] === "") {
+                    board[i] = "X";
+                    let value = minimax(board, true);
+                    board[i] = "";
+                    bestValue = Math.min(value, bestValue);
+                }
+            }
+
+            return bestValue;
+        }
+    };
+
+    const getBestMove = (board) => {
+        let bestMove = null;
+        let bestValue = -Infinity;
+
+        for (let i = 0; i < board.length; i++) {
+            if (board[i] === "") {
+                board[i] = "O";
+                let moveValue = minimax(board, false);
+                board[i] = "";
+                if (moveValue > bestValue) {
+                    bestMove = i;
+                    bestValue = moveValue;
+                }
+            }
+        }
+
+        return bestMove;
+    };
+
+    const aiTurn = () => {
+        const bestMove = getBestMove(gameBoard.getGameBoard());
+        gameBoard.setGameBoard(bestMove, "O");
+        const cell = document.querySelector(`.cell[data-cell="${bestMove}"]`);
+        displayController.updateCellIcon(cell, "O");
+
+        const winner = gameController.checkWinner();
+        if (winner) { 
+            handleEndGame(winner);
+            return;
+        }
+
+        if (gameController.checkTie()) {
+            handleEndGame(null);
+            return;
+        }
+
+        currentPlayerIsX = !currentPlayerIsX;
+        displayController.setStatus(currentPlayerIsX ? "X's Turn" : "O's Turn");
+        displayController.setStatusColor();
+    };
+
+
+
     const handleRestart = () => {
         gameBoard.resetGameBoard();
         gameActive = true;
@@ -178,24 +272,23 @@ const gameController = (() => {
         displayController.setRestartButton("Restart");
     };
 
-    return { handleCellClick, handleRestart };
+    return { handleCellClick, handleRestart, checkWinner, checkTie };
 })();
 
 
 // INITIALIZATION MODULE
 const init = (() => {
-const checkCurrentPage = () => {
-    const pageIdentifier = document.querySelector(".page-identifier");
-    const currentPage = pageIdentifier.getAttribute("data-page");
-    const activeLink = document.querySelector(`.${currentPage}-link`);
-    const inactiveLink = document.querySelector(`.${currentPage === "home" ? "about" : "home"}-link`);
+    const checkCurrentPage = () => {
+        const pageIdentifier = document.querySelector(".page-identifier");
+        const currentPage = pageIdentifier.getAttribute("data-page");
+        const activeLink = document.querySelector(`.${currentPage}-link`);
+        const inactiveLink = document.querySelector(`.${currentPage === "home" ? "about" : "home"}-link`);
 
-    activeLink.classList.add("active-nav");
-    inactiveLink.classList.remove("active-nav");
+        activeLink.classList.add("active-nav");
+        inactiveLink.classList.remove("active-nav");
 
-    return currentPage;
-};
-
+        return currentPage;
+    };
 
     const page = checkCurrentPage();
     if (page === "home") {
@@ -204,10 +297,17 @@ const checkCurrentPage = () => {
         });
         document.querySelector(".restart-button").addEventListener("click", gameController.handleRestart);
 
+        const AIButton = document.querySelector(".ai-button");
+        AIButton.addEventListener("click", () => {
+            aiMode = !aiMode;
+            AIButton.textContent = aiMode ? "Switch to PvP" : "Play vs AI";
+            gameController.handleRestart();
+        });
+
         // Initial Render
         displayController.setStatusColor();
         displayController.render();
     }
-    
+
     checkCurrentPage();
 })();
