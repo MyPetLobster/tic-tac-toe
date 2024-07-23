@@ -94,7 +94,7 @@ h2 {
     position: absolute;
 }
 
-/* ---- BUTTONS ---- */
+/* ---- BUTTONS BASELINE ---- */
 button {
     padding: 0.2em 1.5em;
     border: 1px solid var(--primary-dark);
@@ -234,12 +234,15 @@ li:hover {
     transform: translateY(0);
 }
 
+
+/* ---- GAME BUTTONS ---- */
 .btn-box {
     width: 100%;
     position: relative;
     display: flex;
     align-items: center;
     justify-content: center;
+    gap: 1em;
 }
 .restart-button {
     transition: 500ms;
