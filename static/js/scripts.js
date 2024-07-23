@@ -110,9 +110,6 @@ const gameController = (() => {
         winnerText.textContent = winningMessage;
         endScreen.appendChild(winnerText);
 
-        const gameBoardElement = document.querySelector(".game-board");
-        gameBoardElement.classList.add("fade")
-
         const  restartButton = document.querySelector(".restart-button");
 
         if (winner) {
@@ -131,7 +128,6 @@ const gameController = (() => {
         restartButton.addEventListener("click", () => {
             endScreen.removeChild(winnerText);
             endScreen.classList.remove("show");
-            gameBoardElement.classList.remove("fade");
             restartButton.classList.remove(`winner-btn-${winner ? winner === "X" ? "blue" : "light" : "tie"}`);
         });
 
