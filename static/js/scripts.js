@@ -1,15 +1,3 @@
-const checkCurrentPage = () => {
-    const pageIdentifier = document.querySelector(".page-identifier");
-    const currentPage = pageIdentifier.getAttribute("data-page");
-    if (currentPage === "home") {
-        document.querySelector(".about-link").classList.remove("active-nav");
-        document.querySelector(".home-link").classList.add("active-nav");
-    } else if (currentPage === "about") {
-        document.querySelector(".home-link").classList.remove("active-nav");
-        document.querySelector(".about-link").classList.add("active-nav");
-    }
-    return currentPage
-};
 
 
 
@@ -49,7 +37,7 @@ const displayController = (() => {
             }        
         });
     };
-    
+
     const setStatus = (message) => {
         status.textContent = message;
     };
@@ -93,9 +81,7 @@ const gameController = (() => {
     const checkWinner = () => {
         let winner = null;
         winningConditions.forEach((condition) => {
-            // For every condition, check if the game board has the same value at the indexes
-            // #10 Is destructuring the right move here?
-            // #11 Is there a more efficient way to check for a winner?
+            // TODO - Bitwise win check
             const [a, b, c] = condition;
             if (
                 gameBoard.getGameBoard()[a] &&
@@ -126,45 +112,34 @@ const gameController = (() => {
     };
 
     // Return the correct lazy icon based on the player
-    const selectLazyIcon = (player) => {
-        if (player === "X") {
-            return "static/images/game_icons/lazy_icons/xman-lazy.png";
-        } else {
-            return "static/images/game_icons/lazy_icons/oman-lazy.png";
-        }
-    };
+    const selectLazyIcon = (player) => player === "X" ? "static/images/game_icons/lazy_icons/xman-lazy.png" : "static/images/game_icons/lazy_icons/oman-lazy.png";
 
     const checkTie = () => {
-        // #12 Is this a good use of .every()? How efficient is .every() compared to alternatives?
         return gameBoard.getGameBoard().every((cell) => cell !== "");
     };
 
     const handleCellClick = (e) => {
-        // #13 Is it okay to use closest() here? Is there a better way to get the cell index?
+        // TODO - Test this using just e.target
         const cell = e.target.closest('.cell');
+        const index = Number(cell.getAttribute("data-cell"));
 
-        // #14 parseInt() will go until it finds a number...whereas Number() will return NaN if it finds a non-number character.
-        // Which should I use here. Think about this.
-        const index = parseInt(cell.getAttribute("data-cell"));
-        if (gameBoard.getGameBoard()[index] !== "" || !gameActive) {
+        if (isNaN(index) || gameBoard.getGameBoard()[index] !== "" || !gameActive) {
             return; // If cell is already occupied or game is over, do nothing
         }
 
-        // #15 Should I bother defining a variable for currentPlayerIcon? Or just use currentPlayer? Idk why I did this.
-        const currentPlayerIcon = currentPlayer;
-        gameBoard.setGameBoard(index, currentPlayerIcon);
+        gameBoard.setGameBoard(index, currentPlayer);
 
-        // #16 I def think I should move areWeBeingLazy() and selectLazyIcon() into the gameController module.
-        // #17 Think about if there's a better way to structure the lazy logic. Keep it all together maybe.
+        const updateCellIcon = () => {
+            const randomIcon = selectRandomIcon(currentPlayer);
+            cell.innerHTML = `<img src="${randomIcon}" alt="${currentPlayer}">`;
+        };
+
         if (areWeBeingLazy()) {
-            const lazyIcon = selectLazyIcon(currentPlayerIcon);
-            cell.innerHTML = `<img src="${lazyIcon}" alt="${currentPlayerIcon}">`;
-            setTimeout(() => {
-                const randomIcon = selectRandomIcon(currentPlayerIcon);
-                cell.innerHTML = `<img src="${randomIcon}" alt="${currentPlayerIcon}">`;
-            }, 700);
+            const lazyIcon = selectLazyIcon(currentPlayer);
+            cell.innerHTML = `<img src="${lazyIcon}" alt="${currentPlayer}">`;
+            setTimeout(updateCellIcon, 700);
         } else {
-            displayController.render();
+            updateCellIcon();
         }
 
         // #18 Definitely need to refactor this and remove the repetition
@@ -274,23 +249,37 @@ const gameController = (() => {
 
 
 
-// #25 Should I move this into a module?
-// Event listeners
-const page = checkCurrentPage();
-if (page === "home") {
-    document.querySelectorAll(".cell").forEach((cell) => {
-        cell.addEventListener("click", gameController.handleCellClick);
+// INITIALIZATION MODULE
+const init = (() => {
+    const checkCurrentPage = () => {
+        const pageIdentifier = document.querySelector(".page-identifier");
+        const currentPage = pageIdentifier.getAttribute("data-page");
+        if (currentPage === "home") {
+            document.querySelector(".about-link").classList.remove("active-nav");
+            document.querySelector(".home-link").classList.add("active-nav");
+        } else if (currentPage === "about") {
+            document.querySelector(".home-link").classList.remove("active-nav");
+            document.querySelector(".about-link").classList.add("active-nav");
+        }
+        return currentPage;
+    };
+
+    const page = checkCurrentPage();
+    if (page === "home") {
+        document.querySelectorAll(".cell").forEach((cell) => {
+            cell.addEventListener("click", gameController.handleCellClick);
+        });
+        document.querySelector(".restart-button").addEventListener("click", gameController.handleRestart);
+
+        // Initial render
+        displayController.setStatusColor();
+        displayController.render();
+    }
+
+    const navLinks = document.querySelectorAll(".nav-link");
+    navLinks.forEach((link) => {
+        checkCurrentPage();
     });
-    document.querySelector(".restart-button").addEventListener("click", gameController.handleRestart);
-
-    // Initial render
-    displayController.setStatusColor();
-    displayController.render();
-}
-
-const navLinks = document.querySelectorAll(".nav-link");
-navLinks.forEach((link) => {
-    checkCurrentPage();
-});
+})();
 
 
