@@ -1,35 +1,3 @@
-// #1 Should these be regular functions or arrow functions? Does it matter?
-// #2 Or should these be moved into one of the modules?
-// #3 Should I use a switch statement instead of if/else...or ternary operators?
-
-// Return a random icon depending on player (each player has 6 icons to choose from).
-const selectRandomIcon = (player) => {
-    let num = Math.floor(Math.random() * 6) + 1;
-    if (num < 10) {
-        num = "0" + num;
-    }
-    if (player === "X") {
-        return `static/images/game_icons/x_icons/xman-${num}.png`;
-    } else {
-        return `static/images/game_icons/o_icons/oman-${num}.png`
-    }
-};
-
-// Return true 10% of the time
-const areWeBeingLazy = () => {
-    return Math.random() < 0.1;
-};
-
-// Return the correct lazy icon based on the player
-const selectLazyIcon = (player) => {
-    if (player === "X") {
-        return "static/images/game_icons/lazy_icons/xman-lazy.png";
-    } else {
-        return "static/images/game_icons/lazy_icons/oman-lazy.png";
-    }
-};
-
-
 const checkCurrentPage = () => {
     const pageIdentifier = document.querySelector(".page-identifier");
     const currentPage = pageIdentifier.getAttribute("data-page");
@@ -46,73 +14,64 @@ const checkCurrentPage = () => {
 
 
 // GAME BOARD MODULE
-// #4 is there some way to remove repetition of Array(9).fill("")?
 const gameBoard = (() => {
-    let gameBoard = Array(9).fill("");
+    const EMPTY_BOARD = Array(9).fill("");
+    let gameBoard = [...EMPTY_BOARD];
 
-    // Methods to get, set, and reset the game board
     const getGameBoard = () => gameBoard;
     const setGameBoard = (index, value) => {
         gameBoard[index] = value;
     };
     const resetGameBoard = () => {
-        gameBoard = Array(9).fill("");
+        gameBoard = [...EMPTY_BOARD];
     };
     return { getGameBoard, setGameBoard, resetGameBoard };
 })();
 
-// #5 Should I move this into the display controller module? Being out here as a regular function seems out of place.
-// Set status color
-function setStatusColor() {
-    const header = document.querySelector("h1");
-    const status = document.querySelector(".status");
-    // #6 Should I use a switch statement here? ...in fact when should I use a switch statements exactly?
-    if (status.textContent === "X's Turn") {
-        header.style.color = "var(--primary-blue)";
-        status.style.color = "var(--primary-blue)";
-    } else if (status.textContent === "O's Turn") {
-        header.style.color = "var(--primary-light)";
-        status.style.color = "var(--primary-light)";
-    } else {
-        header.style.color = "var(--primary-dark)";
-        status.style.color = "var(--primary-dark)";
-    }
-}
 
 
 // DISPLAY CONTROLLER MODULE
 const displayController = (() => {
-
-    // #7 Write a function to make writing querySelectors shorter 'qs(identifier)'?
     const cells = document.querySelectorAll(".cell");
     const status = document.querySelector(".status");
     const restartButton = document.querySelector(".restart-button");
 
-    // Methods to render the game board, set the status & restart btn text content
     const render = () => {
         gameBoard.getGameBoard().forEach((value, index) => {
             if (value === "") {
                 cells[index].innerHTML = "";
-            // #8 Is if else okay here inside gameBoard.getGameBoard().forEach()?
-            // #9 Can I just make the below into an else if statement? To remove one nesting level.
-            } else {
-                if (!cells[index].firstChild) {     // Make sure cell is unoccupied
-                    const randomIcon = selectRandomIcon(value);
-                    const iconImgElement = document.createElement("img");
-                    iconImgElement.src = randomIcon;
-                    iconImgElement.alt = value;
-                    cells[index].appendChild(iconImgElement);
-                }
+            } else if (!cells[index].firstChild) {     // Make sure cell is unoccupied
+                const randomIcon = selectRandomIcon(value);
+                const iconImgElement = document.createElement("img");
+                iconImgElement.src = randomIcon;
+                iconImgElement.alt = value;
+                cells[index].appendChild(iconImgElement);
             }        
         });
     };
+    
     const setStatus = (message) => {
         status.textContent = message;
     };
+
+    const setStatusColor = () => {
+        const header = document.querySelector("h1");
+        if (status.textContent === "X's Turn") {
+            header.style.color = "var(--primary-blue)";
+            status.style.color = "var(--primary-blue)";
+        } else if (status.textContent === "O's Turn") {
+            header.style.color = "var(--primary-light)";
+            status.style.color = "var(--primary-light)";
+        } else {
+            header.style.color = "var(--primary-dark)";
+            status.style.color = "var(--primary-dark)";
+        }
+    };
+
     const setRestartButton = (message) => {
         restartButton.textContent = message;
     };
-    return { render, setStatus, setRestartButton };
+    return { render, setStatus, setStatusColor, setRestartButton };
 })();
 
 
@@ -131,7 +90,6 @@ const gameController = (() => {
         [2, 4, 6],
     ];
 
-    // Methods to check for a winner, a tie, and handle cell click
     const checkWinner = () => {
         let winner = null;
         winningConditions.forEach((condition) => {
@@ -148,6 +106,32 @@ const gameController = (() => {
             }
         });
         return winner;
+    };
+
+    const selectRandomIcon = (player) => {
+        let num = Math.floor(Math.random() * 6) + 1;
+        if (num < 10) {
+            num = "0" + num;
+        }
+        if (player === "X") {
+            return `static/images/game_icons/x_icons/xman-${num}.png`;
+        } else {
+            return `static/images/game_icons/o_icons/oman-${num}.png`
+        }
+    };
+
+    // Return true 10% of the time
+    const areWeBeingLazy = () => {
+        return Math.random() < 0.1;
+    };
+
+    // Return the correct lazy icon based on the player
+    const selectLazyIcon = (player) => {
+        if (player === "X") {
+            return "static/images/game_icons/lazy_icons/xman-lazy.png";
+        } else {
+            return "static/images/game_icons/lazy_icons/oman-lazy.png";
+        }
     };
 
     const checkTie = () => {
@@ -239,7 +223,7 @@ const gameController = (() => {
         if (checkTie()) {
             gameActive = false;
             displayController.setStatus("It's a tie!");
-            setStatusColor();
+            displayController.setStatusColor();
             displayController.setRestartButton("New Game");
 
             const endScreen = document.querySelector(".end-screen");
@@ -272,7 +256,7 @@ const gameController = (() => {
         displayController.setStatus(
             currentPlayer === "X" ? "X's Turn" : "O's Turn"
         );
-        setStatusColor();
+        displayController.setStatusColor();
     };
 
     const handleRestart = () => {
@@ -281,7 +265,7 @@ const gameController = (() => {
         currentPlayer = "X";
         displayController.render();
         displayController.setStatus("X's Turn");
-        setStatusColor();
+        displayController.setStatusColor();
         displayController.setRestartButton("Restart");
     };
 
@@ -300,7 +284,7 @@ if (page === "home") {
     document.querySelector(".restart-button").addEventListener("click", gameController.handleRestart);
 
     // Initial render
-    setStatusColor();
+    displayController.setStatusColor();
     displayController.render();
 }
 
