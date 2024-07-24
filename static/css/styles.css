@@ -211,6 +211,14 @@ li:hover {
     position: relative;
     overflow: hidden;
 }
+.winner-text {
+    font-size: 1.5em;
+    font-weight: bold;
+}
+.winner-text-best-of-3 {
+    font-size: 1.5em;
+    font-weight: bold;
+}
 .end-screen {
     height: 100%;
     width: 100%;
@@ -340,7 +348,9 @@ li:hover {
         width: 60vw;
     }
     .page-content {
-        justify-content: center;
+        padding-top: 10vh;
+        justify-content: flex-start;
+        gap: 3em;
     }
     .end-screen {
         font-size: 16px;

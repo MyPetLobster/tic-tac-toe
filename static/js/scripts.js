@@ -1,4 +1,7 @@
 let aiMode = false;
+let xScore = 0;
+let oScore = 0;
+let bestOf3Mode = false;
 
 
 // GAME BOARD MODULE 
@@ -66,7 +69,18 @@ const displayController = (() => {
         setTimeout(callback, 750);
     };
 
-    return { render, setStatus, setStatusColor, setRestartButton, updateCellIcon, setLazyIcon };
+    const updateScoreboard = () => {
+        const mainH1 = document.getElementById("main-h1");
+        if (bestOf3Mode) {
+            mainH1.innerHTML = `<span style="color:var(--primary-blue)">X: ${xScore} </span>
+                                <span style="color:var(--primary-dark)">vs.</span> 
+                                <span style="color:var(--primary-light)">O: ${oScore}</span>`;
+        } else {
+            mainH1.innerHTML = `Tic Tac Toe`;
+        }
+    };
+
+    return { render, setStatus, setStatusColor, setRestartButton, updateCellIcon, setLazyIcon, updateScoreboard };
 })();
 
 
@@ -102,9 +116,8 @@ const gameController = (() => {
 
     const handleEndGame = (winner) => {
         gameActive = false;
-        // TODO - use backdrop-filter for blur effect
         const winningMessage = winner ? `${winner} wins!` : "It's a tie!";
-
+        
         displayController.setStatus(winningMessage);
         displayController.setRestartButton("Play Again");
 
@@ -113,28 +126,67 @@ const gameController = (() => {
         winnerText.textContent = winningMessage;
         endScreen.appendChild(winnerText);
 
-        const  restartButton = document.querySelector(".restart-button");
+        const restartButton = document.querySelector(".restart-button");
 
         if (winner) {
             const colorClass = winner === "X" ? "blue" : "light";
             endScreen.style.backgroundColor = `var(--primary-${colorClass}-opc)`;
             endScreen.style.color = `var(--primary-${colorClass})`;
-            restartButton.classList.add(`winner-btn-${colorClass}`);
+            if (!bestOf3Mode) {
+                restartButton.classList.add(`winner-btn-${colorClass}`);
+            }
         } else {
             endScreen.style.backgroundColor = "var(--primary-dark-opc)";
             endScreen.style.color = `var(--primary-dark)`;
-            restartButton.classList.add("winner-btn-tie");
+            if (!bestOf3Mode) {
+                restartButton.classList.add("winner-btn-tie");
+            }
+        }
+
+        if (!bestOf3Mode) {
+            restartButton.addEventListener("click", () => {
+                endScreen.removeChild(winnerText);
+                endScreen.classList.remove("show");
+                restartButton.classList.remove(`winner-btn-${winner ? winner === "X" ? "blue" : "light" : "tie"}`);
+            });
         }
 
         endScreen.classList.add("show");
 
-        restartButton.addEventListener("click", () => {
-            endScreen.removeChild(winnerText);
-            endScreen.classList.remove("show");
-            restartButton.classList.remove(`winner-btn-${winner ? winner === "X" ? "blue" : "light" : "tie"}`);
-        });
+        if (bestOf3Mode) {
+            if (winner === "X") {
+                xScore++;
+            } else if (winner === "O") {
+                oScore++;
+            }
+            displayController.updateScoreboard();
+            if (xScore === 2 || oScore === 2) {
+                winnerText.classList.add("winner-text-best-of-3");
+                winnerText.textContent = xScore === 2 ? "X wins Best of 3!" : "O wins Best of 3!";
+                endScreen.style.backgroundColor = xScore === 2 ? "var(--primary-blue-opc)" : "var(--primary-light-opc)";
+                endScreen.style.color = xScore === 2 ? "var(--primary-blue)" : "var(--primary-light)";
+                restartButton.classList.add(`winner-btn-${xScore === 2 ? "blue" : "light"}`);
+                restartButton.addEventListener("click", () => {
+                    endScreen.removeChild(winnerText);
+                    endScreen.classList.remove("show");
+                    restartButton.classList.remove(`winner-btn-${winner ? winner === "X" ? "blue" : "light" : "tie"}`);
+                    xScore = 0;
+                    oScore = 0;
+                    displayController.updateScoreboard();
+                });
+            } else {
+                setTimeout(() => {
+                    endScreen.removeChild(winnerText);
+                    endScreen.classList.remove("show");
+                    gameController.handleRestart();
+                }, 3000);
+            }
+        }
+
+    
 
         displayController.render();
+        
     };
 
     const handleCellClick = (e) => {
@@ -272,11 +324,10 @@ const gameController = (() => {
         displayController.setRestartButton("Restart");
     };
 
-    return { handleCellClick, handleRestart, checkWinner, checkTie };
+    return { handleCellClick, handleRestart, checkWinner, checkTie, handleEndGame};
 })();
 
 
-// INITIALIZATION MODULE
 const init = (() => {
     const checkCurrentPage = () => {
         const pageIdentifier = document.querySelector(".page-identifier");
@@ -304,6 +355,24 @@ const init = (() => {
             gameController.handleRestart();
         });
 
+        const bestOf3Button = document.querySelector(".best-of-3-button");
+        bestOf3Button.addEventListener("click", () => {
+            bestOf3Mode = !bestOf3Mode;
+            bestOf3Button.textContent = bestOf3Mode ? "Best of 3: ON" : "Best of 3: OFF";
+            xScore = 0;
+            oScore = 0;
+            displayController.updateScoreboard();
+            gameController.handleRestart();
+        });
+
+        const restartButton = document.querySelector(".restart-button");
+        restartButton.addEventListener("click", () => {
+            xScore = 0;
+            oScore = 0;
+            displayController.updateScoreboard();
+            gameController.handleRestart();
+        });
+        
         // Initial Render
         displayController.setStatusColor();
         displayController.render();
@@ -311,3 +380,4 @@ const init = (() => {
 
     checkCurrentPage();
 })();
+
