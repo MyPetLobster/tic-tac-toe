@@ -190,10 +190,12 @@ const gameController = (() => {
     };
 
     const handleCellClick = (e) => {
+        if (!gameActive) return;  // Prevent clicks when game is inactive
+
         const cell = e.target.closest(".cell");
         const index = Number(cell.getAttribute("data-cell"));
 
-        if (isNaN(index) || gameBoard.getGameBoard()[index] !== "" || !gameActive) return;
+        if (isNaN(index) || gameBoard.getGameBoard()[index] !== "") return;
 
         const currentPlayer = currentPlayerIsX ? "X" : "O";
         gameBoard.setGameBoard(index, currentPlayer);
@@ -202,14 +204,21 @@ const gameController = (() => {
             displayController.setLazyIcon(cell, currentPlayer, () => {
                 displayController.updateCellIcon(cell, currentPlayer);
                 if (aiMode && currentPlayer === "X") {
-                    // Trigger AI turn after 500ms
-                    setTimeout(aiTurn, 500);
+                    // Trigger AI turn after 500ms. Disable player clicks during AI turn
+                    gameActive = false;
+                    setTimeout(() => {
+                        aiTurn();
+                    }, 500);
                 }
             });
         } else {
             displayController.updateCellIcon(cell, currentPlayer);
             if (aiMode && currentPlayer === "X") {
-                setTimeout(aiTurn, 500);
+                // Trigger AI turn after 500ms. Disable player clicks during AI turn
+                gameActive = false;
+                setTimeout(() => {
+                    aiTurn();
+                }, 500);
             }
         }
 
@@ -228,6 +237,7 @@ const gameController = (() => {
         displayController.setStatus(currentPlayerIsX ? "X's Turn" : "O's Turn");
         displayController.setStatusColor();
     };
+
 
     // Minimax Algorithm
     const minimax = (board, isMaximizing) => {
@@ -310,6 +320,7 @@ const gameController = (() => {
         currentPlayerIsX = !currentPlayerIsX;
         displayController.setStatus(currentPlayerIsX ? "X's Turn" : "O's Turn");
         displayController.setStatusColor();
+        gameActive = true;
     };
 
 
@@ -372,7 +383,7 @@ const init = (() => {
             displayController.updateScoreboard();
             gameController.handleRestart();
         });
-        
+
         // Initial Render
         displayController.setStatusColor();
         displayController.render();
