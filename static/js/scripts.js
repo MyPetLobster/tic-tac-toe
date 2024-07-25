@@ -54,7 +54,6 @@ const gameController = (() => {
     };
 
     const handleEndGame = (winner) => {
-        alert("handleEndGame");
         gameActive = false;
         const winningMessage = winner ? `${winner} wins!` : "It's a tie!";
         
