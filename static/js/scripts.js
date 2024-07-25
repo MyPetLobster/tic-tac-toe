@@ -54,6 +54,7 @@ const gameController = (() => {
     };
 
     const handleEndGame = (winner) => {
+        alert("handleEndGame");
         gameActive = false;
         const winningMessage = winner ? `${winner} wins!` : "It's a tie!";
         
@@ -225,6 +226,18 @@ const gameController = (() => {
                 }
             }
         }
+
+        // Got sick of being destroyed by AI during testing. So I added a little bit of randomness to the AI's decision making.
+        // Nobody beats me at tic tac toe (checks notes) 214 times in a row!
+        // It's comeback time baby! 
+
+        // 10% chance for AI to make random move instead of the best move
+        if (Math.random() < 0.1) {
+            const emptyCells = board.map((cell, index) => cell === "" ? index : null).filter(cell => cell !== null);
+            bestMove = emptyCells[Math.floor(Math.random() * emptyCells.length)];
+        }
+
+
         return bestMove;                                        // Return the best move for AI to make
     };
 
@@ -235,7 +248,7 @@ const gameController = (() => {
         displayController.updateCellIcon(cell, "O");
 
         const winner = checkWinner();
-        if (winner) { 
+        if (winner === "O") {           // AI wins end game. Player wins handled inside handleCellClick
             handleEndGame(winner);
             return;
         }
