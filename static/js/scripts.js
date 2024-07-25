@@ -298,7 +298,6 @@ const gameController = (() => {
     };
 
     const restartGame = () => {
-        alert('restart game');
         const endScreen = document.querySelector(".end-screen");
         const winnerText = endScreen.querySelector("h1");
         const restartButton = document.querySelector(".restart-button");
