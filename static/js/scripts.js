@@ -93,133 +93,6 @@ const gameController = (() => {
     ];
     
     const areWeBeingLazy = () => Math.random() < 0.05; // 5% chance of being lazy
-    const handleCellClick = (e) => {
-        if (!gameActive) return;  // Prevent clicks when game is inactive
-
-        const cell = e.target.closest(".cell");
-        const index = Number(cell.getAttribute("data-cell"));
-
-        if (isNaN(index) || gameBoard.getGameBoard()[index] !== "") return;
-
-        const currentPlayer = currentPlayerIsX ? "X" : "O";
-        gameBoard.setGameBoard(index, currentPlayer);
-
-        if (areWeBeingLazy()) {
-            displayController.setLazyIcon(cell, currentPlayer, () => {
-                displayController.updateCellIcon(cell, currentPlayer);
-                if (aiMode && currentPlayer === "X") {
-                    gameActive = false;
-                    setTimeout(aiTurn, 500);
-                }
-            });
-        } else {
-            displayController.updateCellIcon(cell, currentPlayer);
-            if (aiMode && currentPlayer === "X") {
-                gameActive = false;
-                setTimeout(aiTurn, 500);
-            }
-        }
-
-        const winner = checkWinner();
-        if (winner) { 
-            handleEndGame(winner);
-            return;
-        }
-
-        if (checkTie()) {
-            handleEndGame(null);
-            return;
-        }
-
-        currentPlayerIsX = !currentPlayerIsX;
-        displayController.setStatus(currentPlayerIsX ? "X's Turn" : "O's Turn");
-        displayController.setStatusColor();
-    };
-
-    // Minimax Algorithm
-    const minimax = (board, isMaximizing) => {
-        const scores = { X: -10, O: 10, tie: 0 };
-
-        const winner = gameController.checkWinner();
-        if (winner) {
-            return scores[winner];
-        }
-
-        if (gameController.checkTie()) {
-            return scores.tie;
-        }
-
-        if (isMaximizing) {
-            let bestValue = -Infinity;
-
-            for (let i = 0; i < board.length; i++) {
-                if (board[i] === "") {
-                    board[i] = "O";
-                    let value = minimax(board, false);
-                    board[i] = "";
-                    bestValue = Math.max(value, bestValue);
-                }
-            }
-
-            return bestValue;
-        } else {
-            let bestValue = Infinity;
-
-            for (let i = 0; i < board.length; i++) {
-                if (board[i] === "") {
-                    board[i] = "X";
-                    let value = minimax(board, true);
-                    board[i] = "";
-                    bestValue = Math.min(value, bestValue);
-                }
-            }
-
-            return bestValue;
-        }
-    };
-
-    const getBestMove = (board) => {
-        let bestMove = null;
-        let bestValue = -Infinity;
-
-        for (let i = 0; i < board.length; i++) {
-            if (board[i] === "") {
-                board[i] = "O";
-                let moveValue = minimax(board, false);
-                board[i] = "";
-                if (moveValue > bestValue) {
-                    bestMove = i;
-                    bestValue = moveValue;
-                }
-            }
-        }
-
-        return bestMove;
-    };
-
-    const aiTurn = () => {
-        const bestMove = getBestMove(gameBoard.getGameBoard());
-        gameBoard.setGameBoard(bestMove, "O");
-        const cell = document.querySelector(`.cell[data-cell="${bestMove}"]`);
-        displayController.updateCellIcon(cell, "O");
-
-        const winner = gameController.checkWinner();
-        if (winner) { 
-            handleEndGame(winner);
-            return;
-        }
-
-        if (gameController.checkTie()) {
-            handleEndGame(null);
-            return;
-        }
-
-        currentPlayerIsX = !currentPlayerIsX;
-        displayController.setStatus(currentPlayerIsX ? "X's Turn" : "O's Turn");
-        displayController.setStatusColor();
-        gameActive = true;
-    };
-
 
     const checkWinner = () => {
         let winner = null;
@@ -269,7 +142,7 @@ const gameController = (() => {
         }
 
         if (!bestOf3Mode) {
-            restartButton.addEventListener("click", resetGame);
+            restartButton.addEventListener("click", restartGame);
         }
 
         endScreen.classList.add("show");
@@ -287,34 +160,159 @@ const gameController = (() => {
                 endScreen.style.backgroundColor = xScore === 2 ? "var(--primary-blue-opc)" : "var(--primary-light-opc)";
                 endScreen.style.color = xScore === 2 ? "var(--primary-blue)" : "var(--primary-light)";
                 restartButton.classList.add(`winner-btn-${xScore === 2 ? "blue" : "light"}`);
-                restartButton.addEventListener("click", resetGame);
+                restartButton.addEventListener("click", restartGame);
             } else {
                 setTimeout(() => {
                     endScreen.removeChild(winnerText);
                     endScreen.classList.remove("show");
-                    gameController.handleRestart();
-                }, 3000);
+                    restartGame();
+                }, 2000);
             }
         }
 
         displayController.render();
-        
     };
 
-    const resetGame = () => {
+    const handleCellClick = (e) => {
+        if (!gameActive) return;  // Prevent clicks when game is inactive
+
+        const cell = e.target.closest(".cell");
+        const index = Number(cell.getAttribute("data-cell"));
+
+        if (isNaN(index) || gameBoard.getGameBoard()[index] !== "") return;
+
+        const currentPlayer = currentPlayerIsX ? "X" : "O";
+        gameBoard.setGameBoard(index, currentPlayer);
+
+        if (areWeBeingLazy()) {
+            displayController.setLazyIcon(cell, currentPlayer, () => {
+                displayController.updateCellIcon(cell, currentPlayer);
+                if (aiMode && currentPlayer === "X") {
+                    gameActive = false;
+                    setTimeout(aiTurn, 500);
+                }
+            });
+        } else {
+            displayController.updateCellIcon(cell, currentPlayer);
+            if (aiMode && currentPlayer === "X") {
+                gameActive = false;
+                setTimeout(aiTurn, 500);
+            }
+        }
+
+        const winner = checkWinner();
+        if (winner) { 
+            handleEndGame(winner);
+            return;
+        }
+
+        if (checkTie()) {
+            handleEndGame(null);
+            return;
+        }
+
+        currentPlayerIsX = !currentPlayerIsX;
+        displayController.setStatus(currentPlayerIsX ? "X's Turn" : "O's Turn");
+        displayController.setStatusColor();
+    };
+
+    // Minimax Algorithm
+    const minimax = (board, isMaximizing) => {
+        const scores = { X: -10, O: 10, tie: 0 };
+
+        const winner = checkWinner();
+        if (winner) {
+            return scores[winner];
+        }
+
+        if (checkTie()) {
+            return scores.tie;
+        }
+
+        if (isMaximizing) {
+            let bestValue = -Infinity;
+
+            for (let i = 0; i < board.length; i++) {
+                if (board[i] === "") {
+                    board[i] = "O";
+                    let value = minimax(board, false);
+                    board[i] = "";
+                    bestValue = Math.max(value, bestValue);
+                }
+            }
+            return bestValue;
+        } else {
+            let bestValue = Infinity;
+
+            for (let i = 0; i < board.length; i++) {
+                if (board[i] === "") {
+                    board[i] = "X";
+                    let value = minimax(board, true);
+                    board[i] = "";
+                    bestValue = Math.min(value, bestValue);
+                }
+            }
+            return bestValue;
+        }
+    };
+
+    const getBestMove = (board) => {
+        let bestMove = null;
+        let bestValue = -Infinity;
+
+        for (let i = 0; i < board.length; i++) {
+            if (board[i] === "") {
+                board[i] = "O";
+                let moveValue = minimax(board, false);
+                board[i] = "";
+                if (moveValue > bestValue) {
+                    bestMove = i;
+                    bestValue = moveValue;
+                }
+            }
+        }
+        return bestMove;
+    };
+
+    const aiTurn = () => {
+        const bestMove = getBestMove(gameBoard.getGameBoard());
+        gameBoard.setGameBoard(bestMove, "O");
+        const cell = document.querySelector(`.cell[data-cell="${bestMove}"]`);
+        displayController.updateCellIcon(cell, "O");
+
+        const winner = checkWinner();
+        if (winner) { 
+            handleEndGame(winner);
+            return;
+        }
+
+        if (checkTie()) {
+            handleEndGame(null);
+            return;
+        }
+
+        currentPlayerIsX = !currentPlayerIsX;
+        displayController.setStatus(currentPlayerIsX ? "X's Turn" : "O's Turn");
+        displayController.setStatusColor();
+        gameActive = true;
+    };
+
+    const restartGame = () => {
+        alert('restart game');
         const endScreen = document.querySelector(".end-screen");
         const winnerText = endScreen.querySelector("h1");
         const restartButton = document.querySelector(".restart-button");
+
         endScreen.removeChild(winnerText);
         endScreen.classList.remove("show");
         restartButton.classList.remove("winner-btn-blue", "winner-btn-light", "winner-btn-tie");
-        xScore = 0;
-        oScore = 0;
-        displayController.updateScoreboard();
-        handleRestart();
-    };
 
-    const handleRestart = () => {
+        if (bestOf3Mode) {
+            xScore = 0;
+            oScore = 0;
+            displayController.updateScoreboard();
+        }
+
         gameBoard.resetGameBoard();
         gameActive = true;
         currentPlayerIsX = true;
@@ -323,9 +321,10 @@ const gameController = (() => {
         displayController.setStatusColor();
         displayController.setRestartButton("Restart");
     };
-      
-    return { handleCellClick, handleRestart, checkWinner, checkTie, handleEndGame };
+
+    return { handleCellClick, restartGame, checkWinner, checkTie, handleEndGame };
 })();
+
 
 
 const init = (() => {
@@ -343,16 +342,17 @@ const init = (() => {
 
     const page = checkCurrentPage();
     if (page === "home") {
+        // Main game page event listeners
         document.querySelectorAll(".cell").forEach((cell) => {
             cell.addEventListener("click", gameController.handleCellClick);
         });
-        document.querySelector(".restart-button").addEventListener("click", gameController.handleRestart);
+        document.querySelector(".restart-button").addEventListener("click", gameController.restartGame);
 
         const AIButton = document.querySelector(".ai-button");
         AIButton.addEventListener("click", () => {
             aiMode = !aiMode;
             AIButton.textContent = aiMode ? "Switch to PvP" : "Play vs AI";
-            gameController.handleRestart();
+            gameController.restartGame();
         });
 
         const bestOf3Button = document.querySelector(".best-of-3-button");
@@ -362,7 +362,7 @@ const init = (() => {
             xScore = 0;
             oScore = 0;
             displayController.updateScoreboard();
-            gameController.handleRestart();
+            gameController.restartGame();
         });
 
         // Initial Render
