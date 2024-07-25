@@ -1,9 +1,3 @@
-let aiMode = false;
-let xScore = 0;
-let oScore = 0;
-let bestOf3Mode = false;
-
-
 // GAME BOARD MODULE 
 const gameBoard = (() => {
     const EMPTY_BOARD = Array(9).fill("");
@@ -21,69 +15,13 @@ const gameBoard = (() => {
 })();
 
 
-// DISPLAY CONTROLLER MODULE
-const displayController = (() => {
-    const cells = document.querySelectorAll(".cell");
-    const status = document.querySelector(".status");
-    const restartButton = document.querySelector(".restart-button");
-
-    const selectRandomIcon = (isX) => {
-        let num = Math.floor(Math.random() * 6) + 1;
-        num = num < 10 ? "0" + num : num;  // format string for image path
-        return isX ? `static/images/game_icons/x_icons/xman-${num}.png` : `static/images/game_icons/o_icons/oman-${num}.png`;
-    };
-
-    const render = () => {
-        gameBoard.getGameBoard().forEach((value, index) => {
-            if (value === "") {
-                cells[index].innerHTML = "";
-            } 
-        });
-    };
-
-    const setStatus = (message) => {
-        status.textContent = message;
-    };
-
-    const setStatusColor = () => {
-        const header = document.querySelector("h1")
-        const color = status.textContent === "X's Turn" ? "var(--primary-blue)" : "var(--primary-light)";
-
-        header.style.color = color;
-        status.style.color = color;    
-    };
-
-    const setRestartButton = (message) => {
-        restartButton.textContent = message;
-    };
-
-    const updateCellIcon = (cell, player) => {
-        const randomIcon = selectRandomIcon(player === "X");
-        cell.innerHTML = `<img src="${randomIcon}" alt="${player}">`;
-    };
-
-    const setLazyIcon = (cell, player, callback) => {
-        const lazyIcon = player === "X" ? "static/images/game_icons/lazy_icons/xman-lazy.png" : "static/images/game_icons/lazy_icons/oman-lazy.png";
-        cell.innerHTML = `<img src="${lazyIcon}" alt="${player}">`;
-        setTimeout(callback, 500);
-    };
-
-    const updateScoreboard = () => {
-        const mainH1 = document.getElementById("main-h1");
-        if (bestOf3Mode) {
-            mainH1.innerHTML = `<span style="color:var(--primary-blue)">X: ${xScore} </span>
-                                <span style="color:var(--primary-dark)">vs.</span> 
-                                <span style="color:var(--primary-light)">O: ${oScore}</span>`;
-        } else {
-            mainH1.innerHTML = `Tic Tac Toe`;
-        }
-    };
-
-    return { render, setStatus, setStatusColor, setRestartButton, updateCellIcon, setLazyIcon, updateScoreboard };
-})();
-
-
+// GAME CONTROLLER MODULE
 const gameController = (() => {
+    let aiMode = false;
+    let xScore = 0;
+    let oScore = 0;
+    let bestOf3Mode = false;
+
     let currentPlayerIsX = true;
     let gameActive = true;
     const winningConditions = [
@@ -160,7 +98,11 @@ const gameController = (() => {
                 endScreen.style.backgroundColor = xScore === 2 ? "var(--primary-blue-opc)" : "var(--primary-light-opc)";
                 endScreen.style.color = xScore === 2 ? "var(--primary-blue)" : "var(--primary-light)";
                 restartButton.classList.add(`winner-btn-${xScore === 2 ? "blue" : "light"}`);
-                restartButton.addEventListener("click", restartGame);
+                restartButton.addEventListener("click", () => {
+                    xScore = 0;
+                    oScore = 0;
+                    restartGame();
+                });
             } else {
                 setTimeout(() => {
                     endScreen.removeChild(winnerText);
@@ -215,6 +157,7 @@ const gameController = (() => {
         displayController.setStatus(currentPlayerIsX ? "X's Turn" : "O's Turn");
         displayController.setStatusColor();
     };
+
 
     // Minimax Algorithm
     const minimax = (board, isMaximizing) => {
@@ -302,13 +245,13 @@ const gameController = (() => {
         const winnerText = endScreen.querySelector("h1");
         const restartButton = document.querySelector(".restart-button");
 
-        endScreen.removeChild(winnerText);
-        endScreen.classList.remove("show");
-        restartButton.classList.remove("winner-btn-blue", "winner-btn-light", "winner-btn-tie");
-
+        if (endScreen.classList.contains("show")) {
+            endScreen.removeChild(winnerText);
+            endScreen.classList.remove("show");
+            restartButton.classList.remove("winner-btn-blue", "winner-btn-light", "winner-btn-tie");
+        }
+        
         if (bestOf3Mode) {
-            xScore = 0;
-            oScore = 0;
             displayController.updateScoreboard();
         }
 
@@ -321,9 +264,89 @@ const gameController = (() => {
         displayController.setRestartButton("Restart");
     };
 
-    return { handleCellClick, restartGame, checkWinner, checkTie, handleEndGame };
+    // Expose methods to get and set encapsulated variables
+    return { 
+        handleCellClick, 
+        restartGame, 
+        checkWinner, 
+        checkTie, 
+        handleEndGame, 
+        getAIMode: () => aiMode, 
+        setAIMode: (mode) => aiMode = mode, 
+        getBestOf3Mode: () => bestOf3Mode, 
+        setBestOf3Mode: (mode) => bestOf3Mode = mode,
+        getXScore: () => xScore,
+        getOScore: () => oScore,
+        setXScore: (score) => xScore = score,
+        setOScore: (score) => oScore = score,
+    };
 })();
 
+
+// DISPLAY CONTROLLER MODULE
+const displayController = (() => {
+    const cells = document.querySelectorAll(".cell");
+    const status = document.querySelector(".status");
+    const restartButton = document.querySelector(".restart-button");
+
+    const selectRandomIcon = (isX) => {
+        let num = Math.floor(Math.random() * 6) + 1;
+        num = num < 10 ? "0" + num : num;  // format string for image path
+        return isX ? `static/images/game_icons/x_icons/xman-${num}.png` : `static/images/game_icons/o_icons/oman-${num}.png`;
+    };
+
+    const render = () => {
+        gameBoard.getGameBoard().forEach((value, index) => {
+            if (value === "") {
+                cells[index].innerHTML = "";
+            } 
+        });
+    };
+
+    const setStatus = (message) => {
+        status.textContent = message;
+    };
+
+    const setStatusColor = () => {
+        const header = document.querySelector("h1")
+        const color = status.textContent === "X's Turn" ? "var(--primary-blue)" : "var(--primary-light)";
+
+        header.style.color = color;
+        status.style.color = color;    
+    };
+
+    const setRestartButton = (message) => {
+        restartButton.textContent = message;
+    };
+
+    const updateCellIcon = (cell, player) => {
+        const randomIcon = selectRandomIcon(player === "X");
+        cell.innerHTML = `<img src="${randomIcon}" alt="${player}">`;
+    };
+
+    const setLazyIcon = (cell, player, callback) => {
+        const lazyIcon = player === "X" ? "static/images/game_icons/lazy_icons/xman-lazy.png" : `static/images/game_icons/lazy_icons/oman-lazy.png`;
+        cell.innerHTML = `<img src="${lazyIcon}" alt="${player}">`;
+        setTimeout(callback, 500);
+    };
+
+    const updateScoreboard = () => {
+        const mainH1 = document.getElementById("main-h1");
+        const bestOf3Mode = gameController.getBestOf3Mode();
+        const xScore = gameController.getXScore();
+        const oScore = gameController.getOScore();
+    
+        if (bestOf3Mode) {
+            mainH1.innerHTML = `<span style="color:var(--primary-blue)">X: ${xScore} </span>
+                                <span style="color:var(--primary-dark)">vs.</span> 
+                                <span style="color:var(--primary-light)">O: ${oScore}</span>`;
+        } else {
+            mainH1.innerHTML = `Tic Tac Toe`;
+        }
+    };
+
+    return { render, setStatus, setStatusColor, setRestartButton, updateCellIcon, setLazyIcon, updateScoreboard };
+})();
 
 
 const init = (() => {
@@ -340,6 +363,7 @@ const init = (() => {
     };
 
     const page = checkCurrentPage();
+
     if (page === "home") {
         // Main game page event listeners
         document.querySelectorAll(".cell").forEach((cell) => {
@@ -349,17 +373,19 @@ const init = (() => {
 
         const AIButton = document.querySelector(".ai-button");
         AIButton.addEventListener("click", () => {
-            aiMode = !aiMode;
-            AIButton.textContent = aiMode ? "Switch to PvP" : "Play vs AI";
+            const aiMode = gameController.getAIMode();
+            gameController.setAIMode(!aiMode);
+            AIButton.textContent = aiMode ? "Play vs AI" : "Switch to PvP";
             gameController.restartGame();
         });
 
         const bestOf3Button = document.querySelector(".best-of-3-button");
         bestOf3Button.addEventListener("click", () => {
-            bestOf3Mode = !bestOf3Mode;
-            bestOf3Button.textContent = bestOf3Mode ? "Best of 3: ON" : "Best of 3: OFF";
-            xScore = 0;
-            oScore = 0;
+            const bestOf3Mode = gameController.getBestOf3Mode();
+            gameController.setBestOf3Mode(!bestOf3Mode);
+            bestOf3Button.textContent = bestOf3Mode ? "Best of 3: OFF" : "Best of 3: ON";
+            gameController.setXScore(0);
+            gameController.setOScore(0);
             displayController.updateScoreboard();
             gameController.restartGame();
         });
