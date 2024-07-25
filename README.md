@@ -3,7 +3,7 @@
 #### By Cory Suzuki
 #### Submitted on 24-07-25
 
-<img src="./static/images/tictactoe-screenshot.png" width="80%" style="border-radius: 16px">
+<img src="./static/images/tictactoe-screenshot.png" width="80%">
 <p>
     This is a simple Tic Tac Toe game that I created as part of the Odin Project's Javascript curriculum. The game is played in the browser and uses the module pattern to organize the code. The game is played by two players, and the game board is updated with the player's moves. The game will end when a player wins or when the game is a draw. At any point, the game can be restarted. 
 </p>
