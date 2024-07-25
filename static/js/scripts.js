@@ -64,9 +64,8 @@ const displayController = (() => {
 
     const setLazyIcon = (cell, player, callback) => {
         const lazyIcon = player === "X" ? "static/images/game_icons/lazy_icons/xman-lazy.png" : "static/images/game_icons/lazy_icons/oman-lazy.png";
-        
         cell.innerHTML = `<img src="${lazyIcon}" alt="${player}">`;
-        setTimeout(callback, 750);
+        setTimeout(callback, 500);
     };
 
     const updateScoreboard = () => {
@@ -84,7 +83,6 @@ const displayController = (() => {
 })();
 
 
-// GAME CONTROLLER MODULE
 const gameController = (() => {
     let currentPlayerIsX = true;
     let gameActive = true;
@@ -95,100 +93,6 @@ const gameController = (() => {
     ];
     
     const areWeBeingLazy = () => Math.random() < 0.05; // 5% chance of being lazy
-
-    const checkWinner = () => {
-        let winner = null;
-        winningConditions.forEach(([a, b, c]) => {
-            if (
-                gameBoard.getGameBoard()[a] &&
-                gameBoard.getGameBoard()[a] === gameBoard.getGameBoard()[b] &&
-                gameBoard.getGameBoard()[a] === gameBoard.getGameBoard()[c]
-            ) {
-                winner = gameBoard.getGameBoard()[a];
-            }
-        });
-        return winner;
-    };
-
-    const checkTie = () => {
-        return gameBoard.getGameBoard().every(cell => cell !== "")
-    };
-
-    const handleEndGame = (winner) => {
-        gameActive = false;
-        const winningMessage = winner ? `${winner} wins!` : "It's a tie!";
-        
-        displayController.setStatus(winningMessage);
-        displayController.setRestartButton("Play Again");
-
-        const endScreen = document.querySelector(".end-screen");
-        const winnerText = document.createElement("h1");
-        winnerText.textContent = winningMessage;
-        endScreen.appendChild(winnerText);
-
-        const restartButton = document.querySelector(".restart-button");
-
-        if (winner) {
-            const colorClass = winner === "X" ? "blue" : "light";
-            endScreen.style.backgroundColor = `var(--primary-${colorClass}-opc)`;
-            endScreen.style.color = `var(--primary-${colorClass})`;
-            if (!bestOf3Mode) {
-                restartButton.classList.add(`winner-btn-${colorClass}`);
-            }
-        } else {
-            endScreen.style.backgroundColor = "var(--primary-dark-opc)";
-            endScreen.style.color = `var(--primary-dark)`;
-            if (!bestOf3Mode) {
-                restartButton.classList.add("winner-btn-tie");
-            }
-        }
-
-        if (!bestOf3Mode) {
-            restartButton.addEventListener("click", () => {
-                endScreen.removeChild(winnerText);
-                endScreen.classList.remove("show");
-                restartButton.classList.remove(`winner-btn-${winner ? winner === "X" ? "blue" : "light" : "tie"}`);
-            });
-        }
-
-        endScreen.classList.add("show");
-
-        if (bestOf3Mode) {
-            if (winner === "X") {
-                xScore++;
-            } else if (winner === "O") {
-                oScore++;
-            }
-            displayController.updateScoreboard();
-            if (xScore === 2 || oScore === 2) {
-                winnerText.classList.add("winner-text-best-of-3");
-                winnerText.textContent = xScore === 2 ? "X wins Best of 3!" : "O wins Best of 3!";
-                endScreen.style.backgroundColor = xScore === 2 ? "var(--primary-blue-opc)" : "var(--primary-light-opc)";
-                endScreen.style.color = xScore === 2 ? "var(--primary-blue)" : "var(--primary-light)";
-                restartButton.classList.add(`winner-btn-${xScore === 2 ? "blue" : "light"}`);
-                restartButton.addEventListener("click", () => {
-                    endScreen.removeChild(winnerText);
-                    endScreen.classList.remove("show");
-                    restartButton.classList.remove(`winner-btn-${winner ? winner === "X" ? "blue" : "light" : "tie"}`);
-                    xScore = 0;
-                    oScore = 0;
-                    displayController.updateScoreboard();
-                });
-            } else {
-                setTimeout(() => {
-                    endScreen.removeChild(winnerText);
-                    endScreen.classList.remove("show");
-                    gameController.handleRestart();
-                }, 3000);
-            }
-        }
-
-    
-
-        displayController.render();
-        
-    };
-
     const handleCellClick = (e) => {
         if (!gameActive) return;  // Prevent clicks when game is inactive
 
@@ -204,21 +108,15 @@ const gameController = (() => {
             displayController.setLazyIcon(cell, currentPlayer, () => {
                 displayController.updateCellIcon(cell, currentPlayer);
                 if (aiMode && currentPlayer === "X") {
-                    // Trigger AI turn after 500ms. Disable player clicks during AI turn
                     gameActive = false;
-                    setTimeout(() => {
-                        aiTurn();
-                    }, 500);
+                    setTimeout(aiTurn, 500);
                 }
             });
         } else {
             displayController.updateCellIcon(cell, currentPlayer);
             if (aiMode && currentPlayer === "X") {
-                // Trigger AI turn after 500ms. Disable player clicks during AI turn
                 gameActive = false;
-                setTimeout(() => {
-                    aiTurn();
-                }, 500);
+                setTimeout(aiTurn, 500);
             }
         }
 
@@ -237,7 +135,6 @@ const gameController = (() => {
         displayController.setStatus(currentPlayerIsX ? "X's Turn" : "O's Turn");
         displayController.setStatusColor();
     };
-
 
     // Minimax Algorithm
     const minimax = (board, isMaximizing) => {
@@ -324,6 +221,98 @@ const gameController = (() => {
     };
 
 
+    const checkWinner = () => {
+        let winner = null;
+        winningConditions.forEach(([a, b, c]) => {
+            if (
+                gameBoard.getGameBoard()[a] &&
+                gameBoard.getGameBoard()[a] === gameBoard.getGameBoard()[b] &&
+                gameBoard.getGameBoard()[a] === gameBoard.getGameBoard()[c]
+            ) {
+                winner = gameBoard.getGameBoard()[a];
+            }
+        });
+        return winner;
+    };
+
+    const checkTie = () => {
+        return gameBoard.getGameBoard().every(cell => cell !== "")
+    };
+
+    const handleEndGame = (winner) => {
+        gameActive = false;
+        const winningMessage = winner ? `${winner} wins!` : "It's a tie!";
+        
+        displayController.setStatus(winningMessage);
+        displayController.setRestartButton("Play Again");
+
+        const endScreen = document.querySelector(".end-screen");
+        const winnerText = document.createElement("h1");
+        winnerText.textContent = winningMessage;
+        endScreen.appendChild(winnerText);
+
+        const restartButton = document.querySelector(".restart-button");
+
+        if (winner) {
+            const colorClass = winner === "X" ? "blue" : "light";
+            endScreen.style.backgroundColor = `var(--primary-${colorClass}-opc)`;
+            endScreen.style.color = `var(--primary-${colorClass})`;
+            if (!bestOf3Mode) {
+                restartButton.classList.add(`winner-btn-${colorClass}`);
+            }
+        } else {
+            endScreen.style.backgroundColor = "var(--primary-dark-opc)";
+            endScreen.style.color = `var(--primary-dark)`;
+            if (!bestOf3Mode) {
+                restartButton.classList.add("winner-btn-tie");
+            }
+        }
+
+        if (!bestOf3Mode) {
+            restartButton.addEventListener("click", resetGame);
+        }
+
+        endScreen.classList.add("show");
+
+        if (bestOf3Mode) {
+            if (winner === "X") {
+                xScore++;
+            } else if (winner === "O") {
+                oScore++;
+            }
+            displayController.updateScoreboard();
+            if (xScore === 2 || oScore === 2) {
+                winnerText.classList.add("winner-text-best-of-3");
+                winnerText.textContent = xScore === 2 ? "X wins Best of 3!" : "O wins Best of 3!";
+                endScreen.style.backgroundColor = xScore === 2 ? "var(--primary-blue-opc)" : "var(--primary-light-opc)";
+                endScreen.style.color = xScore === 2 ? "var(--primary-blue)" : "var(--primary-light)";
+                restartButton.classList.add(`winner-btn-${xScore === 2 ? "blue" : "light"}`);
+                restartButton.addEventListener("click", resetGame);
+            } else {
+                setTimeout(() => {
+                    endScreen.removeChild(winnerText);
+                    endScreen.classList.remove("show");
+                    gameController.handleRestart();
+                }, 3000);
+            }
+        }
+
+        displayController.render();
+        
+    };
+
+    const resetGame = () => {
+        const endScreen = document.querySelector(".end-screen");
+        const winnerText = endScreen.querySelector("h1");
+        const restartButton = document.querySelector(".restart-button");
+        endScreen.removeChild(winnerText);
+        endScreen.classList.remove("show");
+        restartButton.classList.remove("winner-btn-blue", "winner-btn-light", "winner-btn-tie");
+        xScore = 0;
+        oScore = 0;
+        displayController.updateScoreboard();
+        handleRestart();
+    };
 
     const handleRestart = () => {
         gameBoard.resetGameBoard();
@@ -334,8 +323,8 @@ const gameController = (() => {
         displayController.setStatusColor();
         displayController.setRestartButton("Restart");
     };
-
-    return { handleCellClick, handleRestart, checkWinner, checkTie, handleEndGame};
+      
+    return { handleCellClick, handleRestart, checkWinner, checkTie, handleEndGame };
 })();
 
 
@@ -376,14 +365,6 @@ const init = (() => {
             gameController.handleRestart();
         });
 
-        const restartButton = document.querySelector(".restart-button");
-        restartButton.addEventListener("click", () => {
-            xScore = 0;
-            oScore = 0;
-            displayController.updateScoreboard();
-            gameController.handleRestart();
-        });
-
         // Initial Render
         displayController.setStatusColor();
         displayController.render();
@@ -391,4 +372,3 @@ const init = (() => {
 
     checkCurrentPage();
 })();
-
