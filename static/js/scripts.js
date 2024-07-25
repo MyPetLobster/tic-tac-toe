@@ -58,7 +58,9 @@ const gameController = (() => {
         const winningMessage = winner ? `${winner} wins!` : "It's a tie!";
         
         displayController.setStatus(winningMessage);
-        displayController.setRestartButton("Play Again");
+        if (!bestOf3Mode) {
+            displayController.setRestartButton("Play Again");
+        }
 
         const endScreen = document.querySelector(".end-screen");
         const winnerText = document.createElement("h1");
@@ -92,6 +94,11 @@ const gameController = (() => {
 
         // Best of 3 Mode Endgame Logic
         if (bestOf3Mode) {
+            restartButton.addEventListener("click", () => {
+                xScore = 0;
+                oScore = 0;
+                restartGame();
+            });
             if (winner === "X") {
                 xScore++;
             } else if (winner === "O") {
@@ -105,12 +112,8 @@ const gameController = (() => {
                 winnerText.textContent = xScore === 2 ? "X wins Best of 3!" : "O wins Best of 3!";
                 endScreen.style.backgroundColor = xScore === 2 ? "var(--primary-blue-opc)" : "var(--primary-light-opc)";
                 endScreen.style.color = xScore === 2 ? "var(--primary-blue)" : "var(--primary-light)";
+                restartButton.textContent = "Go again?";
                 restartButton.classList.add(`winner-btn-${xScore === 2 ? "blue" : "light"}`);
-                restartButton.addEventListener("click", () => {
-                    xScore = 0;
-                    oScore = 0;
-                    restartGame();
-                });
             // Automatically start new game after 2 seconds until someone wins best of 3
             } else {
                 setTimeout(() => {
