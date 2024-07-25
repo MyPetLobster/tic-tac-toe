@@ -309,6 +309,14 @@ li:hover {
 .breakmen-div > img {
     width: 30%;
 }
+.readme-link {
+    color: white;
+    transition: 250ms;
+}
+.readme-link:hover {
+    color: var(--primary-blue);
+    font-weight: bold;
+}
 
 
 
