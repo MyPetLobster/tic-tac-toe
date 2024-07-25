@@ -105,12 +105,15 @@ button {
     transition: 250ms;
     cursor: pointer;
 }
-button:hover {
-    color: var(--primary-light);
-    background-color: var(--primary-dark);
-    box-shadow: 0 0 12px 0 rgba(0, 0, 0, 0.196);
-    transform: scale(1.05);
+@media (hover: hover) {
+    button:hover {
+        color: var(--primary-light);
+        background-color: var(--primary-dark);
+        box-shadow: 0 0 12px 0 rgba(0, 0, 0, 0.196);
+        transform: scale(1.05);
+    }
 }
+
 button:active {
     color: var(--primary-light);
     box-shadow: 0 0 6px 0 rgba(0, 0, 0, 0.444);
